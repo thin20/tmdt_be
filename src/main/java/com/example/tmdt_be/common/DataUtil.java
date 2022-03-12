@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -83,6 +84,11 @@ public class DataUtil {
     static private String strKey = "iexsbccs";
     static private String algorithm = "DES";
 
+    public static boolean isValidPhoneNumberVietNam(String phoneNumber) {
+        String phoneRegex = "/(84|0[3|5|7|8|9])+([0-9]{8})\b/g";
+        return phoneNumber.matches(phoneRegex);
+    }
+
     public static boolean isValidEmail(String email) {
         String emailRegex = "[A-Z0-9a-z\\._%+-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}";
         return email.matches(emailRegex);
@@ -125,6 +131,11 @@ public class DataUtil {
             }
         }
         return true;
+    }
+
+    public static Boolean listNullOrEmpty(List list) {
+        if (list == null || list.size() == 0) return true;
+        return false;
     }
 
     public static String addZeroToString(String input, int strLength) {
