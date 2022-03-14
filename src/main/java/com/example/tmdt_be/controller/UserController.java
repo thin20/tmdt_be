@@ -1,6 +1,5 @@
 package com.example.tmdt_be.controller;
 
-import com.example.tmdt_be.domain.User;
 import com.example.tmdt_be.service.UserService;
 import com.example.tmdt_be.service.sdi.CreateUserSdi;
 import com.example.tmdt_be.service.sdi.LoginByPhoneNumberSdi;
@@ -20,7 +19,7 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @PostMapping(value="createUser")
+    @PostMapping(value="register")
     public ResponseEntity<UserSdo> createUser(@Valid @RequestBody CreateUserSdi sdi) {
         return ResponseEntity.ok(userService.createUser(sdi));
     }

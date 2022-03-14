@@ -1,8 +1,10 @@
 package com.example.tmdt_be.service.impl;
 
 import com.example.tmdt_be.common.DataUtil;
+import com.example.tmdt_be.domain.Address;
 import com.example.tmdt_be.domain.User;
 import com.example.tmdt_be.repository.UserRepo;
+import com.example.tmdt_be.service.AddressService;
 import com.example.tmdt_be.service.EncryptService;
 import com.example.tmdt_be.service.TokenService;
 import com.example.tmdt_be.service.UserService;
@@ -24,14 +26,16 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private static EncryptService encryptService;
     private static TokenService tokenService;
+    private static AddressService addressService;
 
     @Autowired
     UserRepo userRepository;
 
     @Autowired
-    public UserServiceImpl(EncryptService encryptService, TokenService tokenService) {
+    public UserServiceImpl(EncryptService encryptService, TokenService tokenService, AddressService addressService) {
         this.encryptService = encryptService;
         this.tokenService = tokenService;
+        this.addressService = addressService;
     }
 
     @Override
@@ -40,15 +44,17 @@ public class UserServiceImpl implements UserService {
         String password = sdi.getPassword();
 
         UserSdo userSdo = new UserSdo();
-        User user = new User();
 
         if (DataUtil.isValidPhoneNumberVietNam(phoneNumber)) {
             throw new AppException("API-COM-PHONE001", "Số điện thoại không đúng định dạng!");
         }
 
         boolean isExists = userRepository.isExistsByPhoneNumber(phoneNumber);
+
+        List<String> paramsError = new ArrayList<>();
         if (isExists) {
-            throw new AppException("API-USR001", "Số điện thoại đã được sử dụng!");
+            paramsError.add(phoneNumber);
+            throw new AppException("API-USR001", "Số điện thoại " + phoneNumber + " đã được sử dụng!", paramsError);
         }
 
         // Mã hóa password
@@ -58,7 +64,7 @@ public class UserServiceImpl implements UserService {
         userSdo.setLastName(sdi.getLastName());
         userSdo.setPhoneNumber(sdi.getPhoneNumber());
 
-        user = sdi.toCreateUser();
+        User user = sdi.toCreateUser();
         userRepository.save(user);
 
         return userSdo;
@@ -86,20 +92,27 @@ public class UserServiceImpl implements UserService {
 
         List<String> paramsError = new ArrayList<>();
         String token = "";
+        String address = "";
 
         if (!DataUtil.isNullOrZero(user.getId())) {
             if (encryptService.checkPassword(password, user.getPassword())) {
                 token = tokenService.generateToken(Long.toString(user.getId()));
+
+                Address addressDefault = addressService.getAddressDefault(user.getId());
+                if (!DataUtil.isNullOrZero(addressDefault.getId())) {
+                    address = addressDefault.getAddress();
+                }
             } else {
                 throw new AppException("API-USR005", "Sai mật khẩu!");
             }
         } else {
             paramsError.add(phoneNumber);
-            throw new AppException("API-USR004", "Số điện thoại " + phoneNumber + " chưa được đăng ký!");
+            throw new AppException("API-USR004", "Số điện thoại " + phoneNumber + " chưa được đăng ký!", paramsError);
         }
 
         UserSdo userSdo = user.toUserSdo();
         userSdo.setToken(token);
+        userSdo.setAddress(address);
 
         return userSdo;
     }

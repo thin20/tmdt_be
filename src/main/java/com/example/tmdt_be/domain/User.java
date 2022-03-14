@@ -69,6 +69,6 @@ public class User {
         userSdo.setAddress(this.getAddress());
         userSdo.setPhoneNumber(this.getPhoneNumber());
         userSdo.setShobbeName(this.getShobbeName());
-        return null;
+        return userSdo;
     }
 }
