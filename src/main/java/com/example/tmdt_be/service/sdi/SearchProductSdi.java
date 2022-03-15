@@ -11,6 +11,10 @@ import org.springframework.data.domain.Pageable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchProductSdi {
+    private Long currentUserId;
+    private Long categoryId;
     private String keyword;
+    private String sortType;
+    private String orderType;
     private Pageable pageable;
 }

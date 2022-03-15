@@ -1,5 +1,7 @@
 package com.example.tmdt_be.controller;
 
+import com.example.tmdt_be.common.Const;
+import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.service.ProductService;
 import com.example.tmdt_be.service.sdi.SearchProductSdi;
 import com.example.tmdt_be.service.sdo.ProductSdo;
@@ -23,10 +25,26 @@ public class ProductController {
     ProductService productService;
 
     @GetMapping(value = "/search-list")
-    public ResponseEntity<PagedResponse<ProductSdo>> searchProducts(@RequestParam(value = "keyword", required = false) String keyword,
+    public ResponseEntity<PagedResponse<ProductSdo>> searchListProduct(@RequestParam(value = "currentUserId", required = false) Long currentUserId,
+                                                                    @RequestParam(value = "categoryId", required = false) Long categoryId,
+                                                                    @RequestParam(value = "keyword", required = false) String keyword,
+                                                                    @RequestParam(value = "sortType", required = false) String sortType,
+                                                                    @RequestParam(value = "orderType", required = false) String orderType,
                                                                     @PageableDefault Pageable pageable) {
         SearchProductSdi sdi = new SearchProductSdi();
+        sdi.setCurrentUserId(currentUserId);
+        sdi.setCategoryId(categoryId);
         sdi.setKeyword(keyword);
+        if (DataUtil.isNullOrEmpty(sortType)) {
+            sdi.setSortType(Const.SORT_TYPE.POPULAR);
+        } else {
+            sdi.setSortType(sortType);
+        }
+        if (DataUtil.isNullOrEmpty(orderType)) {
+            sdi.setOrderType(Const.ORDER_TYPE.DESC);
+        } else {
+            sdi.setOrderType(orderType);
+        }
         sdi.setPageable(pageable);
 
         Page<ProductSdo> result = productService.searchListProduct(sdi);
