@@ -82,13 +82,13 @@ public class Product {
         productSdo.setAddress(this.getAddress());
         productSdo.setImage(this.getImage());
         if (!DataUtil.isNullOrZero(this.getIsSell())) {
-            productSdo.setIsSell(true);
+            productSdo.setIsSell(1L);
         } else {
-            productSdo.setIsSell(false);
+            productSdo.setIsSell(0L);
         }
-        productSdo.setCreatedAt(this.getCreatedAt());
-        productSdo.setUpdatedAt(this.getUpdatedAt());
-        productSdo.setDeletedAt(this.getDeletedAt());
+        productSdo.setCreatedAt(this.getCreatedAt().toString());
+        productSdo.setUpdatedAt(this.getUpdatedAt().toString());
+        productSdo.setDeletedAt(this.getDeletedAt().toString());
 
         return productSdo;
     }

@@ -2,8 +2,6 @@ package com.example.tmdt_be.service.sdo;
 
 import lombok.*;
 
-import java.util.Date;
-
 @Setter
 @Data
 @AllArgsConstructor
@@ -22,11 +20,11 @@ public class ProductSdo {
     private Long numberOfStar;
     private String address;
     private String image;
-    private Boolean isSell;
+    private Long isSell;
     private Long sold;
     private Long totalLiked;
     private Boolean isLiked;
-    private Date createdAt;
-    private Date updatedAt;
-    private Date deletedAt;
+    private String createdAt;
+    private String updatedAt;
+    private String deletedAt;
 }

@@ -2,9 +2,9 @@ package com.example.tmdt_be.repository.impl;
 
 import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
-import com.example.tmdt_be.domain.Product;
 import com.example.tmdt_be.repository.ProductRepoCustom;
 import com.example.tmdt_be.service.sdi.SearchProductSdi;
+import com.example.tmdt_be.service.sdo.ProductSdo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
@@ -19,7 +19,7 @@ public class ProductRepoImpl implements ProductRepoCustom {
     EntityManager em;
 
     @Override
-    public List<Product> searchListProduct(SearchProductSdi sdi) {
+    public List<ProductSdo> searchListProduct(SearchProductSdi sdi) {
         Long categoryId = sdi.getCategoryId();
         String keyword = sdi.getKeyword();
         String sortType = sdi.getSortType();
@@ -43,6 +43,9 @@ public class ProductRepoImpl implements ProductRepoCustom {
         sql.append(" address, ");
         sql.append(" image, ");
         sql.append(" is_sell, ");
+        sql.append(" '0L' as sold, ");
+        sql.append(" '0L' as totalLiked, ");
+        sql.append(" 'false' as isLiked, ");
         sql.append(" created_at, ");
         sql.append(" updated_at, ");
         sql.append(" deleted_at ");
@@ -84,7 +87,7 @@ public class ProductRepoImpl implements ProductRepoCustom {
         params.forEach((key, value) -> query.setParameter(key, value));
 
         List<Object[]> queryResult = query.getResultList();
-        List<Product> result = DataUtil.getResultFromListObjects(queryResult, Product.class.getCanonicalName());
+        List<ProductSdo> result = DataUtil.getResultFromListObjects(queryResult, ProductSdo.class.getCanonicalName());
 
         return result;
     }

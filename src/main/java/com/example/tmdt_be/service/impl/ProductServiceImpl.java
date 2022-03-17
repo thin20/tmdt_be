@@ -2,7 +2,6 @@ package com.example.tmdt_be.service.impl;
 
 import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
-import com.example.tmdt_be.domain.Product;
 import com.example.tmdt_be.repository.ProductRepo;
 import com.example.tmdt_be.service.BillDetailService;
 import com.example.tmdt_be.service.ProductService;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,14 +37,12 @@ public class ProductServiceImpl implements ProductService {
         String sortType = sdi.getSortType();
         String orderType = sdi.getOrderType();
         Pageable pageable = sdi.getPageable();
-        List<Product> listProduct = productRepo.searchListProduct(sdi);
+        List<ProductSdo> listSdo = productRepo.searchListProduct(sdi);
 
-        List<ProductSdo> listSdo = new ArrayList<>();
-        for (Product product : listProduct) {
-            ProductSdo productSdo = product.toProductSdo();
+        for (ProductSdo productSdo : listSdo) {
 
             Long currentUserId = sdi.getCurrentUserId();
-            Long productId = product.getId();
+            Long productId = productSdo.getId();
 
             Long sold = billDetailService.countTotalProductSold(productId);
             productSdo.setSold(sold);
@@ -63,7 +59,6 @@ public class ProductServiceImpl implements ProductService {
             }
             productSdo.setIsLiked(isLiked);
 
-            listSdo.add(productSdo);
         }
 
         // Sort list product
