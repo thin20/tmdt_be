@@ -28,4 +28,9 @@ public class UserController {
     public ResponseEntity<UserSdo> login(@Valid @RequestBody LoginByPhoneNumberSdi sdi) throws JsonProcessingException {
         return ResponseEntity.ok(userService.login(sdi));
     }
+
+    @PostMapping(value="loginByToken")
+    public ResponseEntity<UserSdo> loginByToken(@Valid @RequestBody String token) throws JsonProcessingException {
+        return ResponseEntity.ok(userService.loginByToken(token));
+    }
 }

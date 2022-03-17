@@ -19,10 +19,11 @@ public class ProductSdo {
     private Double price;
     private String description;
     private String title;
-    private Long numberOfStart;
+    private Long numberOfStar;
     private String address;
     private String image;
     private Boolean isSell;
+    private Long sold;
     private Long totalLiked;
     private Boolean isLiked;
     private Date createdAt;

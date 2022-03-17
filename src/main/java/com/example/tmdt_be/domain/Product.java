@@ -44,7 +44,7 @@ public class Product {
     private String title;
 
     @Column(name="number_of_star")
-    private Long numberOfStart;
+    private Long numberOfStar;
 
     @Column(name="address")
     private String address;
@@ -56,15 +56,15 @@ public class Product {
     private Integer isSell;
 
     @Column(name="created_at")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
     @Column(name="updated_at")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
     @Column(name="deleted_at")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date deletedAt;
 
     public ProductSdo toProductSdo() {
@@ -78,7 +78,7 @@ public class Product {
         productSdo.setPrice(this.getPrice());
         productSdo.setDescription(this.getDescription());
         productSdo.setTitle(this.getTitle());
-        productSdo.setNumberOfStart(this.getNumberOfStart());
+        productSdo.setNumberOfStar(this.getNumberOfStar());
         productSdo.setAddress(this.getAddress());
         productSdo.setImage(this.getImage());
         if (!DataUtil.isNullOrZero(this.getIsSell())) {

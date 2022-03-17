@@ -17,4 +17,9 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> getListCategory() {
         return categoryRepo.getListCategory();
     }
+
+    @Override
+    public List<Category> getListCategoryParent() {
+        return categoryRepo.getListCategoryParent();
+    }
 }

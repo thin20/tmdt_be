@@ -22,4 +22,9 @@ public class CategoryController {
     public ResponseEntity<List<Category>> getListCategory() {
         return ResponseEntity.ok(categoryService.getListCategory());
     }
+
+    @GetMapping(value="getListCategoryParent")
+    public ResponseEntity<List<Category>> getListCategoryParent() {
+        return ResponseEntity.ok(categoryService.getListCategoryParent());
+    }
 }

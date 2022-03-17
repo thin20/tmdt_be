@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface CategoryRepoCustom {
     List<Category> getListCategory();
+
+    List<Category> getListCategoryParent();
 }

@@ -17,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -114,6 +114,40 @@ public class UserServiceImpl implements UserService {
         userSdo.setToken(token);
         userSdo.setAddress(address);
 
+        return userSdo;
+    }
+
+    @Override
+    public UserSdo loginByToken(String token) throws JsonProcessingException {
+        UserSdo userSdo = new UserSdo();
+        if (DataUtil.isNullOrEmpty(token)) {
+            throw new AppException("API-USR006", "Token không được trống!");
+        }
+
+        String address = "";
+        if (!tokenService.isTokenExpired(token)) {
+            Optional<String> id = tokenService.getSubFromToken(token);
+            if (id.isPresent()) {
+                Long idSdi = DataUtil.safeToLong(id.get());
+                User user = userRepository.getOne(idSdi);
+
+                if (!DataUtil.isNullOrZero(user.getId())) {
+                    userSdo = user.toUserSdo();
+
+                    Address addressDefault = addressService.getAddressDefault(user.getId());
+                    if (!DataUtil.isNullOrZero(addressDefault.getId())) {
+                        address = addressDefault.getAddress();
+                    }
+                } else {
+                    throw new AppException("API-USR008", "User không tồn tại!");
+                }
+            }
+        } else {
+            throw new AppException("API-USR007", "Token hết hạn!");
+        }
+
+        userSdo.setToken(token);
+        userSdo.setAddress(address);
         return userSdo;
     }
 }

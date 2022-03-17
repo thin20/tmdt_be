@@ -14,4 +14,6 @@ public interface UserService {
     User findByPhoneNumber(String phoneNumber);
 
     UserSdo login(LoginByPhoneNumberSdi sdi) throws JsonProcessingException;
+
+    UserSdo loginByToken(String token) throws JsonProcessingException;
 }

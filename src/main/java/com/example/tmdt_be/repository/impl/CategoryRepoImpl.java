@@ -29,4 +29,22 @@ public class CategoryRepoImpl implements CategoryRepoCustom {
 
         return result;
     }
+
+    @Override
+    public List<Category> getListCategoryParent() {
+        StringBuilder sql = new StringBuilder();
+
+        sql.append(" SELECT id, ");
+        sql.append(" original_category_name, ");
+        sql.append(" image, ");
+        sql.append(" parent_category_id ");
+        sql.append(" from category ");
+        sql.append(" where parent_category_id = 0 ");
+
+        Query query = em.createNativeQuery(sql.toString());
+        List<Object[]> queryResult = query.getResultList();
+        List<Category> result = DataUtil.getResultFromListObjects(queryResult, Category.class.getCanonicalName());
+
+        return result;
+    }
 }

@@ -11,7 +11,8 @@ public class Const {
     public final static class SORT_TYPE {
         public final static String NEWEST = "createdAt";
         public final static String POPULAR = "star";
-        public final static String BEST_SALE = "selled";
+        public final static String BEST_SALE = "sold";
+        public final static String FAVOURITE = "favourite";
         public final static String PRICE = "price";
     }
 
