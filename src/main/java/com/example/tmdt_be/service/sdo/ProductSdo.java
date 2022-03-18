@@ -1,6 +1,9 @@
 package com.example.tmdt_be.service.sdo;
 
+import com.example.tmdt_be.domain.Category;
 import lombok.*;
+
+import java.util.List;
 
 @Setter
 @Data
@@ -8,7 +11,7 @@ import lombok.*;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class ProductSdo {
-    private Long Id;
+    private Long id;
     private String name;
     private Long categoryId;
     private Long userId;
@@ -23,6 +26,8 @@ public class ProductSdo {
     private Long isSell;
     private Long sold;
     private Long totalLiked;
+    private Boolean canComment;
+    private List<Category> categories;
     private Boolean isLiked;
     private String createdAt;
     private String updatedAt;

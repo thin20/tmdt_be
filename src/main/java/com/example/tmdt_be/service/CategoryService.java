@@ -8,4 +8,8 @@ public interface CategoryService {
     List<Category> getListCategory();
 
     List<Category> getListCategoryParent();
+
+    List<Category> getAllParentOfCategory(Long categoryId);
+
+    Category getCategoryById(Long categoryId);
 }

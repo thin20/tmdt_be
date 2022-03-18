@@ -44,4 +44,29 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
 
         return count;
     }
+
+    @Override
+    public Long countBillDetailOfUserAndProduct(Long userId, Long productId) {
+        if (DataUtil.isNullOrZero(userId) | DataUtil.isNullOrZero(productId)) {
+            return 0L;
+        }
+
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT COUNT(1) ");
+        sql.append(" from bill_detail ");
+        sql.append(" where id_user = :userId ");
+        params.put("userId", userId);
+        sql.append(" and id_product = :productId ");
+        params.put("productId", productId);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+
+        Object queryResult = query.getSingleResult();
+
+        return DataUtil.safeToLong(queryResult);
+    }
 }

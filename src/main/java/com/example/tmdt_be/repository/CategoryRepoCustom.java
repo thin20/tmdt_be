@@ -8,4 +8,6 @@ public interface CategoryRepoCustom {
     List<Category> getListCategory();
 
     List<Category> getListCategoryParent();
+
+    Category getCategoryById(Long categoryId);
 }

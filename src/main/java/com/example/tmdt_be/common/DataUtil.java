@@ -65,6 +65,8 @@ public class DataUtil {
                     }
                 } else if ("java.lang.Long".equals(t.getName()) || "long".equals(t.getName())) {
                     f.set(object, DataUtil.safeToLong(objects[i]));
+                } else if ("java.lang.Double".equals(t.getName()) || "double".equals(t.getName())) {
+                    f.set(object, DataUtil.safeToDouble(objects[i]));
                 }
             }
 

@@ -16,4 +16,9 @@ public class BillDetailServiceImpl implements BillDetailService {
     public Long countTotalProductSold(Long productId) {
         return billDetailRepo.countTotalProductSold(productId);
     }
+
+    @Override
+    public Long countBillDetailOfUserAndProduct(Long userId, Long productId) {
+        return billDetailRepo.countBillDetailOfUserAndProduct(userId, productId);
+    }
 }

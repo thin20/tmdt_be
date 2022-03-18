@@ -46,6 +46,8 @@ public class ProductRepoImpl implements ProductRepoCustom {
         sql.append(" '0L' as sold, ");
         sql.append(" '0L' as totalLiked, ");
         sql.append(" 'false' as isLiked, ");
+        sql.append(" 'false' as canComment, ");
+        sql.append(" '[]' as categories, ");
         sql.append(" created_at, ");
         sql.append(" updated_at, ");
         sql.append(" deleted_at ");
@@ -121,5 +123,56 @@ public class ProductRepoImpl implements ProductRepoCustom {
         Object queryResult = query.getSingleResult();
 
         return DataUtil.safeToLong(queryResult);
+    }
+
+    @Override
+    public ProductSdo getProductById(Long productId) {
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+        ProductSdo productSdo = new ProductSdo();
+
+        sql.append(" SELECT ");
+        sql.append(" id, ");
+        sql.append(" `name`, ");
+        sql.append(" id_category, ");
+        sql.append(" id_user, ");
+        sql.append(" quantity, ");
+        sql.append(" discount, ");
+        sql.append(" price, ");
+        sql.append(" description, ");
+        sql.append(" title, ");
+        sql.append(" number_of_star, ");
+        sql.append(" address, ");
+        sql.append(" image, ");
+        sql.append(" is_sell, ");
+        sql.append(" '0L' as sold, ");
+        sql.append(" '0L' as totalLiked, ");
+        sql.append(" 'false' as isLiked, ");
+        sql.append(" 'false' as canComment, ");
+        sql.append(" '[]' as categories, ");
+        sql.append(" created_at, ");
+        sql.append(" updated_at, ");
+        sql.append(" deleted_at ");
+        sql.append(" from product ");
+        sql.append(" where 1 = 1 ");
+
+        if (!DataUtil.isNullOrZero(productId)) {
+            sql.append(" and id = :productId ");
+            params.put("productId", productId);
+        }
+
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+
+        List<Object[]> queryResult = query.getResultList();
+
+        for (Object[] item : queryResult) {
+            productSdo =  DataUtil.convertObjectsToClass(item, productSdo);
+            break;
+        }
+
+        return productSdo;
     }
 }

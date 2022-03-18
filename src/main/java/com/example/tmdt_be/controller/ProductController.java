@@ -4,6 +4,7 @@ import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.service.ProductService;
 import com.example.tmdt_be.service.sdi.SearchProductSdi;
+import com.example.tmdt_be.service.sdo.ProductDetailSdo;
 import com.example.tmdt_be.service.sdo.ProductSdo;
 import lombok.extern.slf4j.Slf4j;
 import me.coong.web.response.PagedResponse;
@@ -50,5 +51,16 @@ public class ProductController {
         Page<ProductSdo> result = productService.searchListProduct(sdi);
 
         return ResponseEntity.ok(PagedResponse.builder().page(result).build());
+    }
+
+    @GetMapping(value="getProductDetail")
+    public ResponseEntity<ProductDetailSdo> getProductDetail(@RequestParam(value = "currentUserId", required = false) Long currentUserId,
+                                                             @RequestParam(value = "productId", required = true) Long productId) {
+        return ResponseEntity.ok(productService.getProductDetail(currentUserId, productId));
+    }
+
+    @GetMapping(value="getProductById")
+    public ResponseEntity<ProductSdo> getProductById(@RequestParam(value = "productId", required = true) Long productId) {
+        return ResponseEntity.ok(productService.getProductById(productId));
     }
 }

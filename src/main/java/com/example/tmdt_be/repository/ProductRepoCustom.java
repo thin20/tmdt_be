@@ -9,4 +9,6 @@ public interface ProductRepoCustom {
     List<ProductSdo> searchListProduct(SearchProductSdi sdi);
 
     Long countItemListProduct(SearchProductSdi sdi);
+
+    ProductSdo getProductById(Long productId);
 }
