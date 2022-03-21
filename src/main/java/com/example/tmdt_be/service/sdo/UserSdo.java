@@ -19,7 +19,6 @@ public class UserSdo {
     private String token;
     private String shobbeName;
 
-
     public static UserSdo fromUser(User user) {
         return
             new UserSdo(
@@ -33,5 +32,9 @@ public class UserSdo {
                 "",
                 user.getShobbeName()
             );
+    }
+
+    public String getFullName() {
+        return this.getFirstName() + " " + this.getLastName();
     }
 }

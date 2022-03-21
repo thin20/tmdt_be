@@ -150,4 +150,10 @@ public class UserServiceImpl implements UserService {
         userSdo.setAddress(address);
         return userSdo;
     }
+
+    @Override
+    public UserSdo findById(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.get().toUserSdo();
+    }
 }

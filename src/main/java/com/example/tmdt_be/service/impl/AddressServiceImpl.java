@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional
 public class AddressServiceImpl implements AddressService {
@@ -16,5 +18,11 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public Address getAddressDefault(Long userId) {
         return addressRepo.getAddressDefault(userId);
+    }
+
+    @Override
+    public Address getAddressById(Long addressId) {
+        Optional<Address> address = addressRepo.findById(addressId);
+        return address.get();
     }
 }
