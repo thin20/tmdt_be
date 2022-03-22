@@ -85,9 +85,9 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
-        sql.append(" where bd.id_status = :purchaseType ");
+        sql.append(" and bd.id_status = :purchaseType ");
         params.put("purchaseType", purchaseType);
-        sql.append(" and p.id_user = :userId ");
+        sql.append(" and bd.id_user = :userId ");
         params.put("userId", userId);
 
         Query query = em.createNativeQuery(sql.toString());

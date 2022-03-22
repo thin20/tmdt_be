@@ -14,6 +14,7 @@
     <name>tmdt_be</name>
     <description>tmdt_be</description>
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <spring-cloud.version>Greenwich.SR5</spring-cloud.version>
         <springfox.swagger.version>3.0.0</springfox.swagger.version>

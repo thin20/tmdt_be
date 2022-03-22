@@ -11,4 +11,8 @@ public interface BillDetailService {
     Long countBillDetailOfUserAndProduct(Long userId, Long productId);
 
     List<BillBySellerSdo> getListBillBySeller(String token, Long purchaseType) throws JsonProcessingException;
+
+    Boolean createBillDetail(String token, Long productId, Long quantity) throws JsonProcessingException;
+
+    Boolean updateBillDetail(String token, Long productId, Long quantity) throws JsonProcessingException;
 }

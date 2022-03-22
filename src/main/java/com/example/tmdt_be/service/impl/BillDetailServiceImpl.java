@@ -2,12 +2,14 @@ package com.example.tmdt_be.service.impl;
 
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.domain.Address;
+import com.example.tmdt_be.domain.BillDetail;
+import com.example.tmdt_be.domain.Product;
 import com.example.tmdt_be.repository.BillDetailRepo;
 import com.example.tmdt_be.repository.ProductRepo;
 import com.example.tmdt_be.service.AddressService;
 import com.example.tmdt_be.service.BillDetailService;
-import com.example.tmdt_be.service.TokenService;
 import com.example.tmdt_be.service.UserService;
+import com.example.tmdt_be.service.exception.AppException;
 import com.example.tmdt_be.service.sdo.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,6 @@ import java.util.*;
 public class BillDetailServiceImpl implements BillDetailService {
     private static UserService userService;
     private static AddressService addressService;
-    private static TokenService tokenService;
 
     @Autowired
     BillDetailRepo billDetailRepo;
@@ -32,7 +33,6 @@ public class BillDetailServiceImpl implements BillDetailService {
     public BillDetailServiceImpl(UserService userService, AddressService addressService) {
         this.userService = userService;
         this.addressService = addressService;
-        this.tokenService = tokenService;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class BillDetailServiceImpl implements BillDetailService {
         if (!DataUtil.isNullOrZero(userSdo.getId())) {
             userId = userSdo.getId();
         } else {
-            return null;
+            throw new AppException("API-USR008", "User không tồn tại!");
         }
 
         List<IdBillDetailSdo> listIdBillDetail = billDetailRepo.getListIdBillDetail(userId, purchaseType);
@@ -108,5 +108,42 @@ public class BillDetailServiceImpl implements BillDetailService {
         }
 
         return listBillBySeller;
+    }
+
+    @Override
+    public Boolean createBillDetail(String token, Long productId, Long quantity) throws JsonProcessingException {
+        Long userId = null;
+        if (!DataUtil.isNullOrEmpty(token)) {
+            token = token.split(" ")[1];
+        }
+        UserSdo userSdo = userService.loginByToken(token);
+        if (!DataUtil.isNullOrZero(userSdo.getId())) {
+            userId = userSdo.getId();
+        } else {
+            throw new AppException("API-USR008", "User không tồn tại!");
+        }
+
+        BillDetail billDetail = new BillDetail();
+        billDetail.setUserId(userId);
+
+        ProductSdo productSdo = productRepo.getProductById(productId);
+        if (!DataUtil.isNullOrZero(productSdo.getId())) {
+            billDetail.setProductId(productId);
+        } else {
+            throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+        }
+
+        quantity = !DataUtil.isNullOrZero(quantity) ? quantity : 1;
+        billDetail.setQuantity(quantity);
+
+        billDetail.setCreatedAt(new Date());
+
+        BillDetail bd = billDetailRepo.save(billDetail);
+        return !DataUtil.isNullOrZero(bd.getId());
+    }
+
+    @Override
+    public Boolean updateBillDetail(String token, Long productId, Long quantity) throws JsonProcessingException {
+        return null;
     }
 }
