@@ -1,5 +1,6 @@
 package com.example.tmdt_be.service.impl;
 
+import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.domain.Address;
 import com.example.tmdt_be.domain.BillDetail;
@@ -111,7 +112,21 @@ public class BillDetailServiceImpl implements BillDetailService {
     }
 
     @Override
-    public Boolean createBillDetail(String token, Long productId, Long quantity) throws JsonProcessingException {
+    public BillDetail getBillById(Long billId, Long statusId) {
+        if (DataUtil.isNullOrZero(billId) | DataUtil.isNullOrZero(statusId)) {
+            return null;
+        }
+        return billDetailRepo.getBillById(billId, statusId);
+    }
+
+    @Override
+    public BillDetail getBillByUserAndProduct(Long userId, Long productId) {
+        if (DataUtil.isNullOrZero(userId) | DataUtil.isNullOrZero(productId)) return null;
+        return getBillByUserAndProduct(userId, productId);
+    }
+
+    @Override
+    public Boolean addToCart(String token, Long productId, Long quantity) throws JsonProcessingException {
         Long userId = null;
         if (!DataUtil.isNullOrEmpty(token)) {
             token = token.split(" ")[1];
@@ -134,16 +149,73 @@ public class BillDetailServiceImpl implements BillDetailService {
         }
 
         quantity = !DataUtil.isNullOrZero(quantity) ? quantity : 1;
-        billDetail.setQuantity(quantity);
 
-        billDetail.setCreatedAt(new Date());
+        BillDetail billDetail1 = billDetailRepo.getBillByUserAndProduct(userId, productId, Const.PURCHASE_TYPE.ORDER);
+        if (!DataUtil.isNullOrZero(billDetail1.getId())) {
+            quantity = quantity + billDetail1.getQuantity();
+            billDetail = billDetail1;
+            billDetail.setUpdatedAt(new Date());
+        } else {
+            billDetail.setUserId(userId);
+            billDetail.setProductId(productId);
+            billDetail.setStatusId(1L);
+            billDetail.setCreatedAt(new Date());
+        }
+
+        billDetail.setQuantity(quantity);
 
         BillDetail bd = billDetailRepo.save(billDetail);
         return !DataUtil.isNullOrZero(bd.getId());
     }
 
     @Override
-    public Boolean updateBillDetail(String token, Long productId, Long quantity) throws JsonProcessingException {
-        return null;
+    public Boolean updateBillStatus(String token, Long billId, Long statusId) throws JsonProcessingException {
+        if (DataUtil.isNullOrZero(billId) | DataUtil.isNullOrZero(statusId)) throw new AppException("API-BILL001", "Cập nhật trạng thái đơn hàng thất bại!");
+
+        Long userId = null;
+        if (!DataUtil.isNullOrEmpty(token)) {
+            token = token.split(" ")[1];
+        }
+        UserSdo userSdo = userService.loginByToken(token);
+        if (!DataUtil.isNullOrZero(userSdo.getId())) {
+            userId = userSdo.getId();
+        } else {
+            throw new AppException("API-USR008", "User không tồn tại!");
+        }
+
+        BillDetail billDetail = billDetailRepo.getBillById(billId, statusId);
+        if (DataUtil.isNullOrZero(billDetail.getId())) {
+            throw new AppException("API-BILL002", "Đơn hàng không tồn tại!");
+        }
+
+        billDetail.setStatusId(statusId);
+        billDetail.setUpdatedAt(new Date());
+
+        Product product = productRepo.findById(billDetail.getProductId()).get();
+        if (DataUtil.isNullOrZero(product.getId())) throw new AppException("API-BILL006", "Không tồn tại sản phẩm trong đơn hàng!");
+        Boolean isClient = (userId == billDetail.getUserId());
+        Boolean isAdmin = (userId == product.getUserId());
+
+        if (statusId == Const.PURCHASE_TYPE.DELIVERING) {
+            if (!isAdmin) throw new AppException("API-BILL004", "Không có quyền cập nhật trạng thái đơn hàng!");
+            if (billDetail.getQuantity() > product.getQuantity()) throw new AppException("API-BILL005", "Số lượng sản phẩm trong đơn hàng lớn hơn số lượng sản phẩm có sẵn trong kho!");
+            if (!DataUtil.isNullOrZero(product.getIsSell())) throw new AppException("API-PRD002", "Sản phẩm hiện không được bán nữa!");
+            Long quantity = product.getQuantity() - billDetail.getQuantity();
+            product.setQuantity(quantity);
+            product.setCreatedAt(new Date());
+            productRepo.save(product);
+        } else if (statusId == Const.PURCHASE_TYPE.ORDER | statusId == Const.PURCHASE_TYPE.WAIT_CONFIRM | statusId == Const.PURCHASE_TYPE.DELIVERED | statusId == Const.PURCHASE_TYPE.CANCELED) {
+            if (!isClient) throw new AppException("API-BILL004", "Không có quyền cập nhật trạng thái đơn hàng!");
+        } else if (statusId == Const.PURCHASE_TYPE.WAIT_TAKE) {
+            if (!isAdmin) throw new AppException("API-BILL004", "Không có quyền cập nhật trạng thái đơn hàng!");
+        } else {
+            List<String> errParams = new ArrayList<>();
+            errParams.add(DataUtil.safeToString(statusId));
+            throw new AppException("API-BILL003", "Không tồn tại trạng thái đơn hàng = " + statusId);
+        }
+
+        BillDetail billDetail1 = billDetailRepo.save(billDetail);
+
+        return !DataUtil.isNullOrZero(billDetail1.getId());
     }
 }

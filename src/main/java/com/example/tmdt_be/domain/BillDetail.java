@@ -15,10 +15,10 @@ import java.util.Date;
 @Builder
 @Table(name="bill_detail")
 public class BillDetail {
-    @javax.persistence.Id
+    @Id
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @Column(name="id_user")
     private Long userId;

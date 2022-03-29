@@ -1,12 +1,14 @@
 package com.example.tmdt_be.repository.impl;
 
 import com.example.tmdt_be.common.DataUtil;
+import com.example.tmdt_be.domain.BillDetail;
 import com.example.tmdt_be.repository.BillDetailRepoCustom;
 import com.example.tmdt_be.service.sdo.IdBillDetailSdo;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.Tuple;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +98,84 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         List<Object[]> queryResult = query.getResultList();
 
         List<IdBillDetailSdo> result = DataUtil.getResultFromListObjects(queryResult, IdBillDetailSdo.class.getCanonicalName());
+
+        return result;
+    }
+
+    @Override
+    public BillDetail getBillById(Long billId, Long statusId) {
+        if (DataUtil.isNullOrZero(billId) | DataUtil.isNullOrZero(statusId)) return null;
+
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT id, ");
+        sql.append("  id_user, ");
+        sql.append("  id_product, ");
+        sql.append("  id_status, ");
+        sql.append("  id_address, ");
+        sql.append("  quantity, ");
+        sql.append("  created_at, ");
+        sql.append("  updated_at, ");
+        sql.append("  deleted_at ");
+        sql.append(" from bill_detail ");
+        sql.append(" where id_status = 1 ");
+        sql.append(" and id = :billId ");
+        params.put("billId", billId);
+        sql.append(" and id_status = :statusId ");
+        params.put("statusId", statusId);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+        List<Object[]> queryResult = query.getResultList();
+
+        BillDetail result = new BillDetail();
+
+        for (Object[] item : queryResult) {
+            result = DataUtil.convertObjectsToClass(item, BillDetail.class.getCanonicalName());
+            break;
+        }
+
+        return result;
+    }
+
+    @Override
+    public BillDetail getBillByUserAndProduct(Long userId, Long productId, Long statusId) {
+        if (DataUtil.isNullOrZero(userId) | DataUtil.isNullOrZero(productId) | DataUtil.isNullOrZero(statusId)) return null;
+
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT id, ");
+        sql.append(" id_user, ");
+        sql.append(" id_product, ");
+        sql.append(" id_status, ");
+        sql.append(" id_address, ");
+        sql.append(" quantity, ");
+        sql.append(" created_at, ");
+        sql.append(" updated_at, ");
+        sql.append(" deleted_at ");
+        sql.append(" from bill_detail ");
+        sql.append(" where id_product = :productId ");
+        params.put("productId", productId);
+        sql.append(" and id_user = :userId ");
+        params.put("userId", userId);
+        sql.append(" and id_status = :statusId ");
+        params.put("statusId", statusId);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+
+        List<Object[]> queryResult = query.getResultList();
+
+        BillDetail result = new BillDetail();
+
+        for (Object[] item : queryResult) {
+            result = DataUtil.convertObjectsToClass(item, BillDetail.class.getCanonicalName());
+            break;
+        }
 
         return result;
     }
