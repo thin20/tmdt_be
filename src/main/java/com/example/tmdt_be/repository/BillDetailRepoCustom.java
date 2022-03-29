@@ -15,4 +15,8 @@ public interface BillDetailRepoCustom {
     BillDetail getBillById(Long billId, Long statusId);
 
     BillDetail getBillByUserAndProduct(Long userId, Long productId, Long statusId);
+
+    Boolean updateQuantityProductInCart(Long billId, Long quantity);
+
+    Boolean deleteProductInCart(Long billId);
 }

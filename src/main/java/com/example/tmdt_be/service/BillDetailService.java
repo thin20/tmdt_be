@@ -20,4 +20,8 @@ public interface BillDetailService {
     Boolean addToCart(String token, Long productId, Long quantity) throws JsonProcessingException;
 
     Boolean updateBillStatus(String token, Long billId, Long statusId) throws JsonProcessingException;
+
+    Boolean updateQuantityProductInCart(String token, Long billId, Long quantity) throws JsonProcessingException;
+
+    Boolean deleteProductInCart(String token, Long billId) throws JsonProcessingException;
 }

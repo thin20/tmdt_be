@@ -4,6 +4,8 @@ import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.service.BillDetailService;
 import com.example.tmdt_be.service.sdi.AddToCartSdi;
+import com.example.tmdt_be.service.sdi.UpdateBillStatusSdi;
+import com.example.tmdt_be.service.sdi.UpdateQuantityProductInCartSdi;
 import com.example.tmdt_be.service.sdo.BillBySellerSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +40,20 @@ public class BillDetailController {
     }
 
     @PutMapping(value="updateBillStatus")
-    ResponseEntity<Boolean> updateBillStatus(@Valid @RequestBody Long billId, Long statusId,
-                                       @RequestHeader("Authorization") String token) throws JsonProcessingException {
-        return ResponseEntity.ok(billDetailService.updateBillStatus(token, billId, statusId));
+    ResponseEntity<Boolean> updateBillStatus(@Valid @RequestBody UpdateBillStatusSdi sdi,
+                                             @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(billDetailService.updateBillStatus(token, sdi.getBillId(), sdi.getStatusId()));
+    }
+
+    @PutMapping(value="updateQuantityProductInCart")
+    ResponseEntity<Boolean> updateQuantityProductInCart(@Valid @RequestBody UpdateQuantityProductInCartSdi sdi,
+                                                        @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(billDetailService.updateQuantityProductInCart(token, sdi.getBillId(), sdi.getQuantity()));
+    }
+
+    @DeleteMapping(value="deleteProductInCart")
+    ResponseEntity<Boolean> deleteProductInCart(@Valid @RequestParam Long billId,
+                                                        @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(billDetailService.deleteProductInCart(token, billId));
     }
 }

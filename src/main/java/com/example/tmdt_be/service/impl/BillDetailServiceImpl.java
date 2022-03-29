@@ -218,4 +218,66 @@ public class BillDetailServiceImpl implements BillDetailService {
 
         return !DataUtil.isNullOrZero(billDetail1.getId());
     }
+
+    @Override
+    public Boolean updateQuantityProductInCart(String token, Long billId, Long quantity) throws JsonProcessingException {
+        if (DataUtil.isNullOrZero(billId) || quantity == null) {
+            throw new AppException("API-BILL007", "Cập nhật số lượng sản phẩm trong giỏ hàng thất bại!");
+        }
+
+        Long userId = null;
+        if (!DataUtil.isNullOrEmpty(token)) {
+            token = token.split(" ")[1];
+        }
+        UserSdo userSdo = userService.loginByToken(token);
+        if (!DataUtil.isNullOrZero(userSdo.getId())) {
+            userId = userSdo.getId();
+        } else {
+            throw new AppException("API-USR008", "User không tồn tại!");
+        }
+
+        BillDetail billDetail = billDetailRepo.findBillByIdAndStatus(billId, Const.PURCHASE_TYPE.ORDER).get();
+        if (DataUtil.isNullOrZero(billDetail.getId())) {
+            throw new AppException("API-BILL002", "Đơn hàng không tồn tại!");
+        }
+
+        if (userId != billDetail.getUserId()) {
+            throw new AppException("API-BILL008", "Không có quyền thay đổi số lượng sản phẩm trong giỏ hàng!");
+        }
+
+        if (quantity == 0) {
+            return billDetailRepo.deleteProductInCart(billDetail.getId());
+        } else {
+            return billDetailRepo.updateQuantityProductInCart(billDetail.getId(), quantity);
+        }
+    }
+
+    @Override
+    public Boolean deleteProductInCart(String token, Long billId) throws JsonProcessingException {
+        if (DataUtil.isNullOrZero(billId)) {
+            throw new AppException("API-BILL009", "Xóa sản phẩm trong giỏ hàng thất bại!");
+        }
+
+        Long userId = null;
+        if (!DataUtil.isNullOrEmpty(token)) {
+            token = token.split(" ")[1];
+        }
+        UserSdo userSdo = userService.loginByToken(token);
+        if (!DataUtil.isNullOrZero(userSdo.getId())) {
+            userId = userSdo.getId();
+        } else {
+            throw new AppException("API-USR008", "User không tồn tại!");
+        }
+
+        BillDetail billDetail = billDetailRepo.findBillByIdAndStatus(billId, Const.PURCHASE_TYPE.ORDER).get();
+        if (DataUtil.isNullOrZero(billDetail.getId())) {
+            throw new AppException("API-BILL002", "Đơn hàng không tồn tại!");
+        }
+
+        if (userId != billDetail.getUserId()) {
+            throw new AppException("API-BILL010", "Không có quyền xóa sản phẩm trong giỏ hàng!");
+        }
+
+        return billDetailRepo.deleteProductInCart(billDetail.getId());
+    }
 }

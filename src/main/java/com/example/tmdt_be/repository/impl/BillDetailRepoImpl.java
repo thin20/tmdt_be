@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.persistence.Tuple;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,17 +110,16 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         Map<String, Object> params = new HashMap<>();
 
         sql.append(" SELECT id, ");
-        sql.append("  id_user, ");
-        sql.append("  id_product, ");
-        sql.append("  id_status, ");
-        sql.append("  id_address, ");
-        sql.append("  quantity, ");
-        sql.append("  created_at, ");
-        sql.append("  updated_at, ");
-        sql.append("  deleted_at ");
-        sql.append(" from bill_detail ");
-        sql.append(" where id_status = 1 ");
-        sql.append(" and id = :billId ");
+        sql.append(" id_user, ");
+        sql.append(" id_product, ");
+        sql.append(" id_status, ");
+        sql.append(" id_address, ");
+        sql.append(" quantity, ");
+        sql.append(" created_at, ");
+        sql.append(" updated_at, ");
+        sql.append(" deleted_at ");
+        sql.append(" FROM bill_detail ");
+        sql.append(" WHERE id = :billId ");
         params.put("billId", billId);
         sql.append(" and id_status = :statusId ");
         params.put("statusId", statusId);
@@ -178,5 +177,51 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         }
 
         return result;
+    }
+
+    @Override
+    public Boolean updateQuantityProductInCart(Long billId, Long quantity) {
+        if (DataUtil.isNullOrZero(billId) || DataUtil.isNullOrZero(quantity)) {
+            return false;
+        }
+
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" UPDATE bill_detail ");
+        sql.append(" SET quantity = :quantity ");
+        params.put("quantity", quantity);
+        sql.append(" WHERE id = :billId ");
+        params.put("billId", billId);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+
+        Object queryResult = query.executeUpdate();
+
+        return queryResult != null;
+    }
+
+    @Override
+    public Boolean deleteProductInCart(Long billId) {
+        if (DataUtil.isNullOrZero(billId)) {
+            return false;
+        }
+
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" DELETE FROM bill_detail ");
+        sql.append(" WHERE id = :billId ");
+        params.put("billId", billId);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+
+        Object queryResult = query.executeUpdate();
+
+        return queryResult != null;
     }
 }

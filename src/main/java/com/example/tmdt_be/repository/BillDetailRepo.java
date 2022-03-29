@@ -14,4 +14,10 @@ public interface BillDetailRepo extends JpaRepository<BillDetail, Long>, BillDet
             nativeQuery = true
     )
     Optional<BillDetail> findAllByUserIdAndProductId(Long userId, Long productId, Long statusId);
+
+    @Query(
+           value = "SELECT * FROM bill_detail a WHERE a.id = :billId and a.id_status = :statusId",
+           nativeQuery = true
+    )
+    Optional<BillDetail> findBillByIdAndStatus(Long billId, Long statusId);
 }
