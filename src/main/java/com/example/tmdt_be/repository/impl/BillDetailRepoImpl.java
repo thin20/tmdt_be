@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +131,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         BillDetail result = new BillDetail();
 
         for (Object[] item : queryResult) {
-            result = DataUtil.convertObjectsToClass(item, BillDetail.class.getCanonicalName());
+            result = DataUtil.convertObjectsToClass(item, result);
             break;
         }
 
@@ -172,7 +171,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         BillDetail result = new BillDetail();
 
         for (Object[] item : queryResult) {
-            result = DataUtil.convertObjectsToClass(item, BillDetail.class.getCanonicalName());
+            result = DataUtil.convertObjectsToClass(item, result);
             break;
         }
 

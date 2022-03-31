@@ -4,6 +4,7 @@ import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.service.BillDetailService;
 import com.example.tmdt_be.service.sdi.AddToCartSdi;
+import com.example.tmdt_be.service.sdi.DeleteProductsInCartSdi;
 import com.example.tmdt_be.service.sdi.UpdateBillStatusSdi;
 import com.example.tmdt_be.service.sdi.UpdateQuantityProductInCartSdi;
 import com.example.tmdt_be.service.sdo.BillBySellerSdo;
@@ -55,5 +56,11 @@ public class BillDetailController {
     ResponseEntity<Boolean> deleteProductInCart(@Valid @RequestParam Long billId,
                                                         @RequestHeader("Authorization") String token) throws JsonProcessingException {
         return ResponseEntity.ok(billDetailService.deleteProductInCart(token, billId));
+    }
+
+    @DeleteMapping(value="deleteProductsInCart")
+    ResponseEntity<Boolean> deleteProductsInCart(@Valid @RequestParam DeleteProductsInCartSdi sdi,
+                                                 @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(billDetailService.deleteProductsInCart(token, sdi));
     }
 }

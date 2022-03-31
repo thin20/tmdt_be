@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -56,7 +55,7 @@ public class DataUtil {
 
                 if (objects[i] == null) continue;
                 if ("java.lang.String".equals(t.getName())) {
-                    if (objects[i] instanceof String || objects[i] instanceof Long){
+                    if (objects[i] instanceof String || objects[i] instanceof Long || objects[i] instanceof  Character){
                         f.set(object, DataUtil.safeToString(objects[i]));
                     } else if (objects[i] instanceof  java.sql.Date || objects[i] instanceof Date
                             || objects[i] instanceof java.sql.Timestamp
@@ -67,6 +66,10 @@ public class DataUtil {
                     f.set(object, DataUtil.safeToLong(objects[i]));
                 } else if ("java.lang.Double".equals(t.getName()) || "double".equals(t.getName())) {
                     f.set(object, DataUtil.safeToDouble(objects[i]));
+                } else if ("java.util.Boolean".equals(t.getName()) || "boolean".equals(t.getName())) {
+                    f.set(object, objects[i]);
+                } else if ("java.util.Date".equals(t.getName())) {
+                    f.set(object, DataUtil.safeToDate(objects[i]));
                 }
             }
 

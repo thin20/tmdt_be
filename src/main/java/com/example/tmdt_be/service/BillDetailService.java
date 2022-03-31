@@ -1,6 +1,7 @@
 package com.example.tmdt_be.service;
 
 import com.example.tmdt_be.domain.BillDetail;
+import com.example.tmdt_be.service.sdi.DeleteProductsInCartSdi;
 import com.example.tmdt_be.service.sdo.BillBySellerSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -24,4 +25,6 @@ public interface BillDetailService {
     Boolean updateQuantityProductInCart(String token, Long billId, Long quantity) throws JsonProcessingException;
 
     Boolean deleteProductInCart(String token, Long billId) throws JsonProcessingException;
+
+    Boolean deleteProductsInCart(String token, DeleteProductsInCartSdi sdi) throws JsonProcessingException;
 }
