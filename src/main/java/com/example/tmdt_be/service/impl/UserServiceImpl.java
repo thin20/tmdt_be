@@ -156,4 +156,20 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findById(userId);
         return user.get().toUserSdo();
     }
+
+    @Override
+    public Long getUserIdByBearerToken(String token) throws JsonProcessingException{
+        Long userId = null;
+        if (!DataUtil.isNullOrEmpty(token)) {
+            token = token.split(" ")[1];
+        }
+        UserSdo userSdo = this.loginByToken(token);
+        if (!DataUtil.isNullOrZero(userSdo.getId())) {
+            userId = userSdo.getId();
+        } else {
+            throw new AppException("API-USR008", "User không tồn tại!");
+        }
+
+        return userId;
+    }
 }

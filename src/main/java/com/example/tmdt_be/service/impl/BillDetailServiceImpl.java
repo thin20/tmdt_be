@@ -11,6 +11,7 @@ import com.example.tmdt_be.service.AddressService;
 import com.example.tmdt_be.service.BillDetailService;
 import com.example.tmdt_be.service.UserService;
 import com.example.tmdt_be.service.exception.AppException;
+import com.example.tmdt_be.service.sdi.BuyProductsSdi;
 import com.example.tmdt_be.service.sdi.DeleteProductsInCartSdi;
 import com.example.tmdt_be.service.sdo.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,16 +50,7 @@ public class BillDetailServiceImpl implements BillDetailService {
 
     @Override
     public List<BillBySellerSdo> getListBillBySeller(String token,Long purchaseType) throws JsonProcessingException {
-        Long userId = null;
-        if (!DataUtil.isNullOrEmpty(token)) {
-            token = token.split(" ")[1];
-        }
-        UserSdo userSdo = userService.loginByToken(token);
-        if (!DataUtil.isNullOrZero(userSdo.getId())) {
-            userId = userSdo.getId();
-        } else {
-            throw new AppException("API-USR008", "User không tồn tại!");
-        }
+        Long userId = userService.getUserIdByBearerToken(token);
 
         List<IdBillDetailSdo> listIdBillDetail = billDetailRepo.getListIdBillDetail(userId, purchaseType);
         HashMap<Long, List<BillDetailSdo>> hashMap = new HashMap<Long, List<BillDetailSdo>>();
@@ -128,16 +120,7 @@ public class BillDetailServiceImpl implements BillDetailService {
 
     @Override
     public Boolean addToCart(String token, Long productId, Long quantity) throws JsonProcessingException {
-        Long userId = null;
-        if (!DataUtil.isNullOrEmpty(token)) {
-            token = token.split(" ")[1];
-        }
-        UserSdo userSdo = userService.loginByToken(token);
-        if (!DataUtil.isNullOrZero(userSdo.getId())) {
-            userId = userSdo.getId();
-        } else {
-            throw new AppException("API-USR008", "User không tồn tại!");
-        }
+        Long userId = userService.getUserIdByBearerToken(token);
 
         BillDetail billDetail = new BillDetail();
         billDetail.setUserId(userId);
@@ -173,16 +156,7 @@ public class BillDetailServiceImpl implements BillDetailService {
     public Boolean updateBillStatus(String token, Long billId, Long statusId) throws JsonProcessingException {
         if (DataUtil.isNullOrZero(billId) | DataUtil.isNullOrZero(statusId)) throw new AppException("API-BILL001", "Cập nhật trạng thái đơn hàng thất bại!");
 
-        Long userId = null;
-        if (!DataUtil.isNullOrEmpty(token)) {
-            token = token.split(" ")[1];
-        }
-        UserSdo userSdo = userService.loginByToken(token);
-        if (!DataUtil.isNullOrZero(userSdo.getId())) {
-            userId = userSdo.getId();
-        } else {
-            throw new AppException("API-USR008", "User không tồn tại!");
-        }
+        Long userId = userService.getUserIdByBearerToken(token);
 
         BillDetail billDetail = billDetailRepo.findById(billId).get();
         if (DataUtil.isNullOrZero(billDetail.getId())) {
@@ -193,6 +167,9 @@ public class BillDetailServiceImpl implements BillDetailService {
         billDetail.setUpdatedAt(new Date());
 
         Product product = productRepo.findById(billDetail.getProductId()).get();
+        if (product.getIsSell() == 0) {
+            throw new AppException("API-PRD002", "Sản phẩm hiện không được bán nữa!");
+        }
         if (DataUtil.isNullOrZero(product.getId())) throw new AppException("API-BILL006", "Không tồn tại sản phẩm trong đơn hàng!");
         Boolean isClient = (userId == billDetail.getUserId());
         Boolean isAdmin = (userId == product.getUserId());
@@ -226,16 +203,7 @@ public class BillDetailServiceImpl implements BillDetailService {
             throw new AppException("API-BILL007", "Cập nhật số lượng sản phẩm trong giỏ hàng thất bại!");
         }
 
-        Long userId = null;
-        if (!DataUtil.isNullOrEmpty(token)) {
-            token = token.split(" ")[1];
-        }
-        UserSdo userSdo = userService.loginByToken(token);
-        if (!DataUtil.isNullOrZero(userSdo.getId())) {
-            userId = userSdo.getId();
-        } else {
-            throw new AppException("API-USR008", "User không tồn tại!");
-        }
+        Long userId = userService.getUserIdByBearerToken(token);
 
         BillDetail billDetail = billDetailRepo.findBillByIdAndStatus(billId, Const.PURCHASE_TYPE.ORDER).get();
         if (DataUtil.isNullOrZero(billDetail.getId())) {
@@ -259,16 +227,7 @@ public class BillDetailServiceImpl implements BillDetailService {
             throw new AppException("API-BILL009", "Xóa sản phẩm trong giỏ hàng thất bại!");
         }
 
-        Long userId = null;
-        if (!DataUtil.isNullOrEmpty(token)) {
-            token = token.split(" ")[1];
-        }
-        UserSdo userSdo = userService.loginByToken(token);
-        if (!DataUtil.isNullOrZero(userSdo.getId())) {
-            userId = userSdo.getId();
-        } else {
-            throw new AppException("API-USR008", "User không tồn tại!");
-        }
+        Long userId = userService.getUserIdByBearerToken(token);
 
         BillDetail billDetail = billDetailRepo.findBillByIdAndStatus(billId, Const.PURCHASE_TYPE.ORDER).get();
         if (DataUtil.isNullOrZero(billDetail.getId())) {
@@ -289,30 +248,66 @@ public class BillDetailServiceImpl implements BillDetailService {
             throw new AppException("API-BILL009", "Xóa sản phẩm trong giỏ hàng thất bại!");
         }
 
-        Long userId = null;
-        if (!DataUtil.isNullOrEmpty(token)) {
-            token = token.split(" ")[1];
-        }
-        UserSdo userSdo = userService.loginByToken(token);
-        if (!DataUtil.isNullOrZero(userSdo.getId())) {
-            userId = userSdo.getId();
-        } else {
-            throw new AppException("API-USR008", "User không tồn tại!");
-        }
+        Long userId = userService.getUserIdByBearerToken(token);
 
-        Long finalUserId = userId;
         billIds.forEach(billId -> {
-
             BillDetail billDetail = billDetailRepo.findBillByIdAndStatus(billId, Const.PURCHASE_TYPE.ORDER).get();
             if (DataUtil.isNullOrZero(billDetail.getId())) {
                 throw new AppException("API-BILL002", "Đơn hàng không tồn tại!");
             }
 
-            if (finalUserId != billDetail.getUserId()) {
+            if (userId != billDetail.getUserId()) {
                 throw new AppException("API-BILL010", "Không có quyền xóa sản phẩm trong giỏ hàng!");
             }
 
             billDetailRepo.deleteProductInCart(billDetail.getId());
+        });
+
+        return true;
+    }
+
+    @Override
+    public Boolean buyProducts(String token, BuyProductsSdi sdi) throws JsonProcessingException {
+        List<Long> billIds = sdi.getBillIds();
+
+        if (DataUtil.isNullOrEmpty(billIds)) {
+            throw new AppException("API-BILL012", "Mua sản phẩm thất bại!");
+        }
+
+        Long userId = userService.getUserIdByBearerToken(token);
+
+        billIds.forEach(billId -> {
+            BillDetail billDetail = billDetailRepo.getBillById(billId, Const.PURCHASE_TYPE.ORDER);
+            if (DataUtil.isNullOrZero(billDetail.getId())) {
+                throw new AppException("API-BILL002", "Đơn hàng không tồn tại!");
+            }
+
+            if (userId != billDetail.getUserId()) {
+                throw new AppException("API-BILL011", "Không có quyền mua sản phẩm trong giỏ hàng!");
+            }
+
+            Product product = productRepo.findById(billDetail.getProductId()).get();
+            if (DataUtil.isNullOrZero(product.getId())) {
+                throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+            }
+
+            if (product.getIsSell() == 0) {
+                throw new AppException("API-PRD002", "Sản phẩm hiện không được bán nữa!");
+            }
+
+            Long quantityBuy = billDetail.getQuantity();
+            if (product.getQuantity() < quantityBuy) {
+                List<String> errParams = new ArrayList<>();
+                errParams.add(DataUtil.safeToString(product.getQuantity()));
+                throw new AppException("API-PRD003", "Số lượng sản phẩm trong giỏ hàng chỉ còn " + product.getQuantity() +" sản phẩm!");
+            }
+
+            product.setQuantity(billDetail.getQuantity() - quantityBuy);
+            productRepo.save(product);
+
+            billDetail.setStatusId(Const.PURCHASE_TYPE.WAIT_CONFIRM);
+            billDetailRepo.save(billDetail);
+
         });
 
         return true;

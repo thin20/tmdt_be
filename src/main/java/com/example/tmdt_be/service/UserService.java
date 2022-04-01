@@ -18,4 +18,6 @@ public interface UserService {
     UserSdo loginByToken(String token) throws JsonProcessingException;
 
     UserSdo findById(Long userId);
+
+    Long getUserIdByBearerToken(String token) throws JsonProcessingException;
 }

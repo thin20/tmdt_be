@@ -3,10 +3,7 @@ package com.example.tmdt_be.controller;
 import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.service.BillDetailService;
-import com.example.tmdt_be.service.sdi.AddToCartSdi;
-import com.example.tmdt_be.service.sdi.DeleteProductsInCartSdi;
-import com.example.tmdt_be.service.sdi.UpdateBillStatusSdi;
-import com.example.tmdt_be.service.sdi.UpdateQuantityProductInCartSdi;
+import com.example.tmdt_be.service.sdi.*;
 import com.example.tmdt_be.service.sdo.BillBySellerSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -62,5 +59,11 @@ public class BillDetailController {
     ResponseEntity<Boolean> deleteProductsInCart(@Valid @RequestParam DeleteProductsInCartSdi sdi,
                                                  @RequestHeader("Authorization") String token) throws JsonProcessingException {
         return ResponseEntity.ok(billDetailService.deleteProductsInCart(token, sdi));
+    }
+
+    @PostMapping(value="buyProduct")
+    ResponseEntity<Boolean> buyProducts(@Valid @RequestBody BuyProductsSdi sdi,
+                                        @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(billDetailService.buyProducts(token, sdi));
     }
 }
