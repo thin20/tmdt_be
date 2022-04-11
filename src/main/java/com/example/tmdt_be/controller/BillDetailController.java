@@ -55,13 +55,13 @@ public class BillDetailController {
         return ResponseEntity.ok(billDetailService.deleteProductInCart(token, billId));
     }
 
-    @DeleteMapping(value="deleteProductsInCart")
-    ResponseEntity<Boolean> deleteProductsInCart(@Valid @RequestParam DeleteProductsInCartSdi sdi,
+    @PostMapping(value="deleteProductsInCart")
+    ResponseEntity<Boolean> deleteProductsInCart(@Valid @RequestBody DeleteProductsInCartSdi sdi,
                                                  @RequestHeader("Authorization") String token) throws JsonProcessingException {
         return ResponseEntity.ok(billDetailService.deleteProductsInCart(token, sdi));
     }
 
-    @PostMapping(value="buyProduct")
+    @PostMapping(value="buyProducts")
     ResponseEntity<Boolean> buyProducts(@Valid @RequestBody BuyProductsSdi sdi,
                                         @RequestHeader("Authorization") String token) throws JsonProcessingException {
         return ResponseEntity.ok(billDetailService.buyProducts(token, sdi));
