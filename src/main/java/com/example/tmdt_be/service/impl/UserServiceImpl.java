@@ -12,11 +12,13 @@ import com.example.tmdt_be.service.exception.AppException;
 import com.example.tmdt_be.service.sdi.ChangePasswordSdi;
 import com.example.tmdt_be.service.sdi.CreateUserSdi;
 import com.example.tmdt_be.service.sdi.LoginByPhoneNumberSdi;
+import com.example.tmdt_be.service.sdi.UpdateUserInfoSdi;
 import com.example.tmdt_be.service.sdo.UserSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -204,6 +206,27 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new AppException("API-USR005", "Sai mật khẩu!");
         }
+        return true;
+    }
+
+    @Override
+    public Boolean updateUserInfo(String token, UpdateUserInfoSdi sdi, List<MultipartFile> files) throws JsonProcessingException {
+        if (DataUtil.isNullOrEmpty(sdi.getLastName())) {
+            throw new AppException("API-USR010", "Tên không được trống!");
+        }
+
+        Long userId = this.getUserIdByBearerToken(token);
+
+        User user = userRepository.findById(userId).get();
+        user.setFirstName(sdi.getFirstName());
+        user.setLastName(sdi.getLastName());
+        user.setEmail(sdi.getEmail());
+        user.setShobbeName(sdi.getShobbeName());
+
+        userRepository.save(user);
+
+        // TODO: upload files
+
         return true;
     }
 }
