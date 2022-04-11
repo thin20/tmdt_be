@@ -30,6 +30,7 @@ public class AddressRepoImpl implements AddressRepoCustom {
         sql.append(" ward, ");
         sql.append(" district, ");
         sql.append(" city, ");
+        sql.append(" country, ");
         sql.append(" latitude, ");
         sql.append(" longitude, ");
         sql.append(" is_default, ");
@@ -55,6 +56,41 @@ public class AddressRepoImpl implements AddressRepoCustom {
         }
 
         return address;
+    }
+
+    @Override
+    public List<Address> getListAddressByUser(Long userId) {
+        if (DataUtil.isNullOrZero(userId)) {
+            return null;
+        }
+
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT id, ");
+        sql.append(" id_user, ");
+        sql.append(" recipient_name, ");
+        sql.append(" recipient_phone_number, ");
+        sql.append(" detail_address, ");
+        sql.append(" ward, ");
+        sql.append(" district, ");
+        sql.append(" city, ");
+        sql.append(" country, ");
+        sql.append(" latitude, ");
+        sql.append(" longitude, ");
+        sql.append(" is_default, ");
+        sql.append(" created_at, ");
+        sql.append(" updated_at ");
+        sql.append(" from address ");
+        sql.append(" where id_user = :userId ");
+        params.put("userId", userId);
+
+        Query query = em.createNativeQuery(sql.toString());
+        params.forEach((key, value) -> query.setParameter(key, value));
+        List<Object[]> queryResult = query.getResultList();
+        List<Address> result = DataUtil.getResultFromListObjects(queryResult, Address.class.getCanonicalName());
+
+        return result;
     }
 
 }

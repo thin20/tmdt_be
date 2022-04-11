@@ -3,8 +3,8 @@ package com.example.tmdt_be.service.impl;
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.domain.Address;
 import com.example.tmdt_be.domain.User;
+import com.example.tmdt_be.repository.AddressRepo;
 import com.example.tmdt_be.repository.UserRepo;
-import com.example.tmdt_be.service.AddressService;
 import com.example.tmdt_be.service.EncryptService;
 import com.example.tmdt_be.service.TokenService;
 import com.example.tmdt_be.service.UserService;
@@ -29,16 +29,17 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private static EncryptService encryptService;
     private static TokenService tokenService;
-    private static AddressService addressService;
 
     @Autowired
     UserRepo userRepository;
 
     @Autowired
-    public UserServiceImpl(EncryptService encryptService, TokenService tokenService, AddressService addressService) {
+    AddressRepo addressRepo;
+
+    @Autowired
+    public UserServiceImpl(EncryptService encryptService, TokenService tokenService) {
         this.encryptService = encryptService;
         this.tokenService = tokenService;
-        this.addressService = addressService;
     }
 
     @Override
@@ -101,7 +102,7 @@ public class UserServiceImpl implements UserService {
             if (encryptService.checkPassword(password, user.getPassword())) {
                 token = tokenService.generateToken(Long.toString(user.getId()));
 
-                Address addressDefault = addressService.getAddressDefault(user.getId());
+                Address addressDefault = addressRepo.getAddressDefault(user.getId());
                 if (!DataUtil.isNullOrZero(addressDefault.getId())) {
                     address = addressDefault.getAddress();
                 }
@@ -137,7 +138,7 @@ public class UserServiceImpl implements UserService {
                 if (!DataUtil.isNullOrZero(user.getId())) {
                     userSdo = user.toUserSdo();
 
-                    Address addressDefault = addressService.getAddressDefault(user.getId());
+                    Address addressDefault = addressRepo.getAddressDefault(user.getId());
                     if (!DataUtil.isNullOrZero(addressDefault.getId())) {
                         address = addressDefault.getAddress();
                     }

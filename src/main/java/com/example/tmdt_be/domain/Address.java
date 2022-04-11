@@ -21,7 +21,7 @@ public class Address {
     private Long id;
 
     @Column(name="id_user")
-    private Long idUser;
+    private Long userId;
 
     @Column(name="recipient_name")
     private String recipientName;
@@ -41,14 +41,17 @@ public class Address {
     @Column(name="city")
     private String city;
 
+    @Column(name="country")
+    private String country;
+
     @Column(name="latitude")
     private Double latitude;
 
     @Column(name="longitude")
     private Double longitude;
 
-    @Column(name="is_default", nullable = false, columnDefinition = "TINYINT(1)")
-    private Boolean isDefault;
+    @Column(name="is_default")
+    private Long isDefault;
 
     @Column(name="created_at")
     @Temporal(TemporalType.TIMESTAMP)
