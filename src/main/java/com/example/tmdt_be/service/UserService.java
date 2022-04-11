@@ -1,6 +1,7 @@
 package com.example.tmdt_be.service;
 
 import com.example.tmdt_be.domain.User;
+import com.example.tmdt_be.service.sdi.ChangePasswordSdi;
 import com.example.tmdt_be.service.sdi.CreateUserSdi;
 import com.example.tmdt_be.service.sdi.LoginByPhoneNumberSdi;
 import com.example.tmdt_be.service.sdo.UserSdo;
@@ -20,4 +21,8 @@ public interface UserService {
     UserSdo findById(Long userId);
 
     Long getUserIdByBearerToken(String token) throws JsonProcessingException;
+
+    UserSdo getUserByBearerToken(String token) throws JsonProcessingException;
+
+    Boolean changePassword(String token, ChangePasswordSdi sdi) throws JsonProcessingException;
 }

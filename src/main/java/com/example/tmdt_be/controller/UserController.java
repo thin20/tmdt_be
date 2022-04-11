@@ -1,6 +1,7 @@
 package com.example.tmdt_be.controller;
 
 import com.example.tmdt_be.service.UserService;
+import com.example.tmdt_be.service.sdi.ChangePasswordSdi;
 import com.example.tmdt_be.service.sdi.CreateUserSdi;
 import com.example.tmdt_be.service.sdi.LoginByPhoneNumberSdi;
 import com.example.tmdt_be.service.sdo.UserSdo;
@@ -33,4 +34,11 @@ public class UserController {
     public ResponseEntity<UserSdo> loginByToken(@Valid @RequestBody String token) throws JsonProcessingException {
         return ResponseEntity.ok(userService.loginByToken(token));
     }
+
+    @PutMapping(value="changePassword")
+    public ResponseEntity<Boolean> changePassword(@Valid @RequestBody  ChangePasswordSdi sdi,
+                                                  @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(userService.changePassword(token, sdi));
+    }
+
 }

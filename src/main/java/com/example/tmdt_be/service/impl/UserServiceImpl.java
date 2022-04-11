@@ -9,6 +9,7 @@ import com.example.tmdt_be.service.EncryptService;
 import com.example.tmdt_be.service.TokenService;
 import com.example.tmdt_be.service.UserService;
 import com.example.tmdt_be.service.exception.AppException;
+import com.example.tmdt_be.service.sdi.ChangePasswordSdi;
 import com.example.tmdt_be.service.sdi.CreateUserSdi;
 import com.example.tmdt_be.service.sdi.LoginByPhoneNumberSdi;
 import com.example.tmdt_be.service.sdo.UserSdo;
@@ -171,5 +172,38 @@ public class UserServiceImpl implements UserService {
         }
 
         return userId;
+    }
+
+    @Override
+    public UserSdo getUserByBearerToken(String token) throws JsonProcessingException {
+        if (!DataUtil.isNullOrEmpty(token)) {
+            token = token.split(" ")[1];
+        }
+        UserSdo userSdo = this.loginByToken(token);
+        if (!DataUtil.isNullOrZero(userSdo.getId())) {
+        } else {
+            throw new AppException("API-USR008", "User không tồn tại!");
+        }
+        return userSdo;
+    }
+
+    @Override
+    public Boolean changePassword(String token, ChangePasswordSdi sdi) throws JsonProcessingException {
+        String oldPassword = sdi.getOldPassword();
+        String newPassword = sdi.getNewPassword();
+        Long userId = this.getUserIdByBearerToken(token);
+
+        User user = userRepository.findById(userId).get();
+
+        if (encryptService.checkPassword(oldPassword, user.getPassword())) {
+            if (oldPassword.equals(newPassword)) {
+                throw new AppException("API-USR009", "Mật khẩu mới phải khác mật khẩu cũ!");
+            }
+            user.setPassword(encryptService.encryptPassword(newPassword));
+            userRepository.save(user);
+        } else {
+            throw new AppException("API-USR005", "Sai mật khẩu!");
+        }
+        return true;
     }
 }
