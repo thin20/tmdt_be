@@ -16,6 +16,9 @@ import com.example.tmdt_be.service.sdi.DeleteProductsInCartSdi;
 import com.example.tmdt_be.service.sdo.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +108,41 @@ public class BillDetailServiceImpl implements BillDetailService {
     }
 
     @Override
+    public Page<BillDetailSdo> getListBillByUserAndStatus(String token, Long purchaseType, Pageable pageable) throws JsonProcessingException {
+        Long userId = userService.getUserIdByBearerToken(token);
+
+        if (DataUtil.isNullOrZero(purchaseType)) { List<String> errParams = new ArrayList<>();
+            errParams.add(DataUtil.safeToString(purchaseType));
+            throw new AppException("API-BILL003", "Không tồn tại trạng thái đơn hàng = " + purchaseType);
+        }
+
+        List<BillDetailSdo> listBillDetail = new ArrayList<>();
+
+        List<IdBillDetailSdo> listIdBillDetail = billDetailRepo.getListIdBillDetailPagination(userId, purchaseType, pageable);
+        listIdBillDetail.forEach(item -> {
+            BillDetailSdo billDetail = new BillDetailSdo();
+            billDetail.setBillId(item.getBillId());
+            billDetail.setQuantity(item.getQuantity());
+
+            if (!DataUtil.isNullOrZero(item.getAddressId())) {
+                Address address = addressService.getAddressById(item.getAddressId());
+                billDetail.setAddress(address.getAddress());
+            }
+
+            if (!DataUtil.isNullOrZero(item.getProductId())) {
+                ProductSdo product = productRepo.getProductById(item.getProductId());
+                billDetail.setProduct(product);
+            }
+
+            listBillDetail.add(billDetail);
+        });
+
+        Long count = billDetailRepo.countBillDetailOfUserAndProduct(userId, purchaseType);
+
+        return new PageImpl<>(listBillDetail, pageable , count);
+    }
+
+    @Override
     public BillDetail getBillById(Long billId, Long statusId) {
         if (DataUtil.isNullOrZero(billId) | DataUtil.isNullOrZero(statusId)) {
             return null;
@@ -130,6 +168,10 @@ public class BillDetailServiceImpl implements BillDetailService {
             billDetail.setProductId(productId);
         } else {
             throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+        }
+
+        if (productSdo.getIsSell() == 0) {
+            throw new AppException("API-PRD002", "Sản phẩm hiện không được bán nữa!");
         }
 
         quantity = !DataUtil.isNullOrZero(quantity) ? quantity : 1;
@@ -269,6 +311,7 @@ public class BillDetailServiceImpl implements BillDetailService {
     @Override
     public Boolean buyProducts(String token, BuyProductsSdi sdi) throws JsonProcessingException {
         List<Long> billIds = sdi.getBillIds();
+        Long addressId = sdi.getAddressId();
 
         if (DataUtil.isNullOrEmpty(billIds)) {
             throw new AppException("API-BILL012", "Mua sản phẩm thất bại!");
@@ -276,6 +319,12 @@ public class BillDetailServiceImpl implements BillDetailService {
 
         Long userId = userService.getUserIdByBearerToken(token);
 
+        if (DataUtil.isNullOrZero(addressId)) {
+            Address address = addressService.getAddressDefault(userId);
+            addressId = address.getId();
+        }
+
+        Long finalAddressId = addressId;
         billIds.forEach(billId -> {
             BillDetail billDetail = billDetailRepo.getBillById(billId, Const.PURCHASE_TYPE.ORDER);
             if (DataUtil.isNullOrZero(billDetail.getId())) {
@@ -306,6 +355,7 @@ public class BillDetailServiceImpl implements BillDetailService {
             productRepo.save(product);
 
             billDetail.setStatusId(Const.PURCHASE_TYPE.WAIT_CONFIRM);
+            billDetail.setAddressId(finalAddressId);
             billDetailRepo.save(billDetail);
 
         });

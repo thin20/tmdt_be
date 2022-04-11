@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import org.springframework.data.domain.Pageable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +100,59 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         List<IdBillDetailSdo> result = DataUtil.getResultFromListObjects(queryResult, IdBillDetailSdo.class.getCanonicalName());
 
         return result;
+    }
+
+    @Override
+    public List<IdBillDetailSdo> getListIdBillDetailPagination(Long userId, Long purchaseType, Pageable pageable) {
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT bd.id as billId, ");
+        sql.append(" bd.quantity as quantity, ");
+        sql.append(" p.id_user as sellerId, ");
+        sql.append(" bd.id_address as addressId, ");
+        sql.append(" p.id as productId ");
+        sql.append(" from bill_detail bd ");
+        sql.append(" join product p ");
+        sql.append(" on bd.id_product = p.id ");
+        sql.append(" and bd.id_status = :purchaseType ");
+        params.put("purchaseType", purchaseType);
+        sql.append(" and bd.id_user = :userId ");
+        params.put("userId", userId);
+
+        Query query = em.createNativeQuery(sql.toString());
+        query.setMaxResults(pageable.getPageSize());
+        query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+        List<Object[]> queryResult = query.getResultList();
+
+        List<IdBillDetailSdo> result = DataUtil.getResultFromListObjects(queryResult, IdBillDetailSdo.class.getCanonicalName());
+
+        return result;
+    }
+
+    @Override
+    public Long countIdBillDetailPagination(Long userId, Long purchaseType) {
+
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT COUNT(1) ");
+        sql.append(" from bill_detail bd ");
+        sql.append(" join product p ");
+        sql.append(" on bd.id_product = p.id ");
+        sql.append(" and bd.id_status = :purchaseType ");
+        params.put("purchaseType", purchaseType);
+        sql.append(" and bd.id_user = :userId ");
+        params.put("userId", userId);
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+
+        Object queryResult = query.getSingleResult();
+
+        return DataUtil.safeToLong(queryResult);
     }
 
     @Override

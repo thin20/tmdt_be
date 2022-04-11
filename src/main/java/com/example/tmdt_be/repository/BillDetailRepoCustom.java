@@ -3,6 +3,7 @@ package com.example.tmdt_be.repository;
 import com.example.tmdt_be.domain.BillDetail;
 import com.example.tmdt_be.service.sdo.IdBillDetailSdo;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface BillDetailRepoCustom {
@@ -11,6 +12,10 @@ public interface BillDetailRepoCustom {
     Long countBillDetailOfUserAndProduct(Long userId, Long productId);
 
     List<IdBillDetailSdo> getListIdBillDetail(Long userId, Long purchaseType);
+
+    List<IdBillDetailSdo> getListIdBillDetailPagination(Long userId, Long purchaseType, Pageable pageable);
+
+    Long countIdBillDetailPagination(Long userId, Long purchaseType);
 
     BillDetail getBillById(Long billId, Long statusId);
 

@@ -5,9 +5,14 @@ import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.service.BillDetailService;
 import com.example.tmdt_be.service.sdi.*;
 import com.example.tmdt_be.service.sdo.BillBySellerSdo;
+import com.example.tmdt_be.service.sdo.BillDetailSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import me.coong.web.response.PagedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +29,15 @@ public class BillDetailController {
     @GetMapping(value="cart")
     ResponseEntity<List<BillBySellerSdo>> cart(@RequestHeader("Authorization") String token) throws JsonProcessingException {
         return ResponseEntity.ok(billDetailService.getListBillBySeller(token, DataUtil.safeToLong(Const.PURCHASE_TYPE.ORDER)));
+    }
+
+    @GetMapping(value="listBill")
+    ResponseEntity<PagedResponse<BillDetailSdo>> listBill(@RequestHeader("Authorization") String token,
+                                                          @RequestParam(value="purchaseType", required = false) Long purchaseType,
+                                                          @PageableDefault Pageable pageable) throws JsonProcessingException {
+        Page<BillDetailSdo> result = billDetailService.getListBillByUserAndStatus(token, purchaseType, pageable);
+
+        return ResponseEntity.ok(PagedResponse.builder().page(result).build());
     }
 
     @GetMapping(value="countTotalProductSold")

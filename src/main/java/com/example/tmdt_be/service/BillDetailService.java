@@ -4,7 +4,10 @@ import com.example.tmdt_be.domain.BillDetail;
 import com.example.tmdt_be.service.sdi.BuyProductsSdi;
 import com.example.tmdt_be.service.sdi.DeleteProductsInCartSdi;
 import com.example.tmdt_be.service.sdo.BillBySellerSdo;
+import com.example.tmdt_be.service.sdo.BillDetailSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -14,6 +17,8 @@ public interface BillDetailService {
     Long countBillDetailOfUserAndProduct(Long userId, Long productId);
 
     List<BillBySellerSdo> getListBillBySeller(String token, Long purchaseType) throws JsonProcessingException;
+
+    Page<BillDetailSdo> getListBillByUserAndStatus(String token, Long purchaseType, Pageable pageable) throws JsonProcessingException;
 
     BillDetail getBillById(Long billId, Long statusId);
 

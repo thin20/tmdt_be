@@ -13,4 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 public class BuyProductsSdi {
     private List<Long> billIds;
+    private Long addressId;
 }

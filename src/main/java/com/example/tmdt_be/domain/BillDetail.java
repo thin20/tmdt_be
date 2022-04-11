@@ -30,7 +30,7 @@ public class BillDetail {
     private Long statusId;
 
     @Column(name="id_address")
-    private String addressId;
+    private Long addressId;
 
     @Column(name="quantity")
     private Long quantity;
