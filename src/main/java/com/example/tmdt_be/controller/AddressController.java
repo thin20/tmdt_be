@@ -47,4 +47,10 @@ public class AddressController {
                                                      @RequestHeader("Authorization") String token) throws JsonProcessingException {
         return ResponseEntity.ok(addressService.updateUserAddress(token, sdi));
     }
+
+    @DeleteMapping(value="deleteUserAddress")
+    public ResponseEntity<Boolean> deleteUserAddress(@RequestParam(value="addressId", required = true) Long addressId,
+                                                     @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(addressService.deleteUserAddress(token, addressId));
+    }
 }

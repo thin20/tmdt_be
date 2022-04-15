@@ -44,10 +44,11 @@ public class UserController {
         return ResponseEntity.ok(userService.changePassword(token, sdi));
     }
 
-    @PutMapping(value="updateUserInfo")
+    @PostMapping(value="updateUserInfo")
     public ResponseEntity<Boolean> updateUserInfo(@Valid @RequestBody UpdateUserInfoSdi sdi,
-                                                  @RequestPart ("files") List<MultipartFile> files,
+//                                                  @RequestPart ("files") List<MultipartFile> files,
                                                   @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        List<MultipartFile> files = null;
         return ResponseEntity.ok(userService.updateUserInfo(token, sdi, files));
     }
 

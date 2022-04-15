@@ -19,4 +19,6 @@ public interface AddressService {
     Address createUserAddress(String token, CreateUserAddressSdi sdi) throws JsonProcessingException;
 
     Address updateUserAddress(String token, UpdateUserAddressSdi sdi) throws JsonProcessingException;
+
+    Boolean deleteUserAddress(String token, Long addressId) throws JsonProcessingException;
 }

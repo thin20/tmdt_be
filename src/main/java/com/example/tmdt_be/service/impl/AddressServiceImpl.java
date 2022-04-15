@@ -150,7 +150,10 @@ public class AddressServiceImpl implements AddressService {
         Address address = addressRepo.findById(id).orElseGet(() -> {
             throw new AppException("API-ADR005", "Địa chỉ chưa được đăng ký!");
         });
-        address.setUserId(userId);
+
+        if (address.getUserId() != userId) {
+            throw new AppException("API-ADR007", "Không có quyền cập nhật địa chỉ!");
+        }
         address.setRecipientName(recipientName);
         address.setRecipientPhoneNumber(recipientPhoneNumber);
         address.setCity(city);
@@ -162,5 +165,28 @@ public class AddressServiceImpl implements AddressService {
         address.setUpdatedAt(new Date());
 
         return addressRepo.save(address);
+    }
+
+    @Override
+    public Boolean deleteUserAddress(String token, Long addressId) throws JsonProcessingException {
+        Long userId = userService.getUserIdByBearerToken(token);
+        if (DataUtil.isNullOrZero(addressId)) {
+            throw new AppException("API-ADR006", "Xóa địa chỉ thất bại!");
+        }
+
+        Address address = addressRepo.findById(addressId).orElseGet(() -> {
+            throw new AppException("API-ADR009", "Địa chỉ không tồn tại!");
+        });
+
+        if (address.getUserId() != userId) {
+            throw new AppException("API-ADR008", "Không có quyền xóa địa chỉ!");
+        }
+
+        if (address.getIsDefault() == 1) {
+            throw new AppException("API-ADR010", "Không được xóa địa chỉ mặc định!");
+        }
+
+        addressRepo.delete(address);
+        return true;
     }
 }
