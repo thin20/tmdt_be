@@ -83,6 +83,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" SELECT bd.id as billId, ");
         sql.append(" bd.quantity as quantity, ");
         sql.append(" p.id_user as sellerId, ");
+        sql.append(" bd.id_user as userId, ");
         sql.append(" bd.id_address as addressId, ");
         sql.append(" p.id as productId, ");
         sql.append(" bd.id_status as purchaseType ");
@@ -112,6 +113,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" SELECT bd.id as billId, ");
         sql.append(" bd.quantity as quantity, ");
         sql.append(" p.id_user as sellerId, ");
+        sql.append(" bd.id_user as userId, ");
         sql.append(" bd.id_address as addressId, ");
         sql.append(" p.id as productId, ");
         sql.append(" bd.id_status as purchaseType ");
@@ -178,6 +180,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" SELECT bd.id as billId, ");
         sql.append(" bd.quantity as quantity, ");
         sql.append(" p.id_user as sellerId, ");
+        sql.append(" bd.id_user as userId, ");
         sql.append(" bd.id_address as addressId, ");
         sql.append(" p.id as productId, ");
         sql.append(" bd.id_status as purchaseType ");
@@ -188,8 +191,10 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
             sql.append(" and bd.id_status = :purchaseType ");
             params.put("purchaseType", purchaseType);
         } else {
-            sql.append(" and bd.id_status <> :purchaseType ");
-            params.put("purchaseType", Const.PURCHASE_TYPE.ORDER);
+            sql.append(" and bd.id_status <> :purchaseType1 ");
+            params.put("purchaseType1", Const.PURCHASE_TYPE.ORDER);
+            sql.append(" and bd.id_status <> :purchaseType2 ");
+            params.put("purchaseType2", Const.PURCHASE_TYPE.CANCELED);
         }
         sql.append(" and p.id_user = :sellerId ");
         params.put("sellerId", sellerId);
@@ -219,8 +224,10 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
             sql.append(" and bd.id_status = :purchaseType ");
             params.put("purchaseType", purchaseType);
         } else {
-            sql.append(" and bd.id_status <> :purchaseType ");
-            params.put("purchaseType", Const.PURCHASE_TYPE.ORDER);
+            sql.append(" and bd.id_status <> :purchaseType1 ");
+            params.put("purchaseType1", Const.PURCHASE_TYPE.ORDER);
+            sql.append(" and bd.id_status <> :purchaseType2 ");
+            params.put("purchaseType2", Const.PURCHASE_TYPE.CANCELED);
         }
         sql.append(" and p.id_user = :sellerId ");
         params.put("sellerId", sellerId);

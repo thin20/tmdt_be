@@ -11,6 +11,7 @@ public class IdBillDetailSdo {
     private Long billId;
     private Long quantity;
     private Long sellerId;
+    private Long userId;
     private Long addressId;
     private Long productId;
     private Long purchaseType;

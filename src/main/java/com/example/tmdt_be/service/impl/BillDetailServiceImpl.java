@@ -154,7 +154,7 @@ public class BillDetailServiceImpl implements BillDetailService {
     }
 
     @Override
-    public Page<BillDetailSdo> getListBillBySellerAndStatus(String token, Long purchaseType, Pageable pageable) throws JsonProcessingException {
+    public Page<BillDetailSellerSdo> getListBillBySellerAndStatus(String token, Long purchaseType, Pageable pageable) throws JsonProcessingException {
         UserSdo user = userService.getUserByBearerToken(token);
         Long userId = user.getId();
 
@@ -162,32 +162,39 @@ public class BillDetailServiceImpl implements BillDetailService {
             throw new AppException("API-BILL013", "Lấy danh sách đơn hàng thất bại!");
         }
 
-        List<BillDetailSdo> listBillDetail = new ArrayList<>();
+        List<BillDetailSellerSdo> listBillDetail = new ArrayList<>();
 
         List<IdBillDetailSdo> listIdBillDetail = billDetailRepo.getListIdBillDetailSellerPagination(userId, purchaseType, pageable);
         listIdBillDetail.forEach(item -> {
-            BillDetailSdo billDetail = new BillDetailSdo();
-            billDetail.setBillId(item.getBillId());
-            billDetail.setQuantity(item.getQuantity());
-            billDetail.setPurchaseType(item.getPurchaseType());
-            billDetail.setSellerId(item.getSellerId());
-            billDetail.setSeller(user.getFullName());
+            BillDetailSellerSdo billSellerDetail = new BillDetailSellerSdo();
+            billSellerDetail.setBillId(item.getBillId());
+            billSellerDetail.setQuantity(item.getQuantity());
+            billSellerDetail.setPurchaseType(item.getPurchaseType());
+            billSellerDetail.setSellerId(item.getSellerId());
+            billSellerDetail.setSeller(user.getFullName());
 
             if (!DataUtil.isNullOrZero(item.getAddressId())) {
                 Address address = addressService.getAddressById(item.getAddressId());
                 if (address != null) {
-                    billDetail.setAddress(address.getAddress());
+                    billSellerDetail.setAddress(address);
+                }
+            }
+
+            if (!DataUtil.isNullOrZero(item.getUserId())) {
+                UserSdo userSdo = userService.findById(item.getUserId());
+                if (userSdo != null) {
+                    billSellerDetail.setUser(userSdo);
                 }
             }
 
             if (!DataUtil.isNullOrZero(item.getProductId())) {
                 ProductSdo product = productRepo.getProductById(item.getProductId());
                 if (product != null) {
-                    billDetail.setProduct(product);
+                    billSellerDetail.setProduct(product);
                 }
             }
 
-            listBillDetail.add(billDetail);
+            listBillDetail.add(billSellerDetail);
         });
 
         Long count = billDetailRepo.countIdBillDetailSellerPagination(userId, purchaseType);

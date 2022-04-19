@@ -6,6 +6,7 @@ import com.example.tmdt_be.service.BillDetailService;
 import com.example.tmdt_be.service.sdi.*;
 import com.example.tmdt_be.service.sdo.BillBySellerSdo;
 import com.example.tmdt_be.service.sdo.BillDetailSdo;
+import com.example.tmdt_be.service.sdo.BillDetailSellerSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import me.coong.web.response.PagedResponse;
@@ -41,10 +42,10 @@ public class BillDetailController {
     }
 
     @GetMapping(value="listBillOfSeller")
-    ResponseEntity<PagedResponse<BillDetailSdo>> listBillOfSeller(@RequestHeader("Authorization") String token,
-                                                                  @RequestParam(value="purchaseType", required = false) Long purchaseType,
-                                                                  @PageableDefault Pageable pageable) throws JsonProcessingException {
-        Page<BillDetailSdo> result = billDetailService.getListBillBySellerAndStatus(token, purchaseType, pageable);
+    ResponseEntity<PagedResponse<BillDetailSellerSdo>> listBillOfSeller(@RequestHeader("Authorization") String token,
+                                                                        @RequestParam(value="purchaseType", required = false) Long purchaseType,
+                                                                        @PageableDefault Pageable pageable) throws JsonProcessingException {
+        Page<BillDetailSellerSdo> result = billDetailService.getListBillBySellerAndStatus(token, purchaseType, pageable);
 
         return ResponseEntity.ok(PagedResponse.builder().page(result).build());
     }
