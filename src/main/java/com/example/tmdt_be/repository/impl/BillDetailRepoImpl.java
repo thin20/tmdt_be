@@ -1,5 +1,6 @@
 package com.example.tmdt_be.repository.impl;
 
+import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.domain.BillDetail;
 import com.example.tmdt_be.repository.BillDetailRepoCustom;
@@ -83,7 +84,8 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" bd.quantity as quantity, ");
         sql.append(" p.id_user as sellerId, ");
         sql.append(" bd.id_address as addressId, ");
-        sql.append(" p.id as productId ");
+        sql.append(" p.id as productId, ");
+        sql.append(" bd.id_status as purchaseType ");
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
@@ -111,12 +113,18 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" bd.quantity as quantity, ");
         sql.append(" p.id_user as sellerId, ");
         sql.append(" bd.id_address as addressId, ");
-        sql.append(" p.id as productId ");
+        sql.append(" p.id as productId, ");
+        sql.append(" bd.id_status as purchaseType ");
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
-        sql.append(" and bd.id_status = :purchaseType ");
-        params.put("purchaseType", purchaseType);
+        if (purchaseType != Const.PURCHASE_TYPE.ALL) {
+            sql.append(" and bd.id_status = :purchaseType ");
+            params.put("purchaseType", purchaseType);
+        } else {
+            sql.append(" and bd.id_status <> :purchaseType ");
+            params.put("purchaseType", Const.PURCHASE_TYPE.ORDER);
+        }
         sql.append(" and bd.id_user = :userId ");
         params.put("userId", userId);
 
@@ -134,7 +142,6 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
 
     @Override
     public Long countIdBillDetailPagination(Long userId, Long purchaseType) {
-
         StringBuilder sql = new StringBuilder();
         Map<String, Object> params = new HashMap<>();
 
@@ -143,9 +150,81 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
         sql.append(" and bd.id_status = :purchaseType ");
-        params.put("purchaseType", purchaseType);
+        if (purchaseType != Const.PURCHASE_TYPE.ALL) {
+            sql.append(" and bd.id_status = :purchaseType ");
+            params.put("purchaseType", purchaseType);
+        } else {
+            sql.append(" and bd.id_status <> :purchaseType ");
+            params.put("purchaseType", Const.PURCHASE_TYPE.ORDER);
+        }
         sql.append(" and bd.id_user = :userId ");
         params.put("userId", userId);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+
+        Object queryResult = query.getSingleResult();
+
+        return DataUtil.safeToLong(queryResult);
+    }
+
+    @Override
+    public List<IdBillDetailSdo> getListIdBillDetailSellerPagination(Long sellerId, Long purchaseType, Pageable pageable) {
+
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT bd.id as billId, ");
+        sql.append(" bd.quantity as quantity, ");
+        sql.append(" p.id_user as sellerId, ");
+        sql.append(" bd.id_address as addressId, ");
+        sql.append(" p.id as productId, ");
+        sql.append(" bd.id_status as purchaseType ");
+        sql.append(" from bill_detail bd ");
+        sql.append(" join product p ");
+        sql.append(" on bd.id_product = p.id ");
+        if (purchaseType != Const.PURCHASE_TYPE.ALL) {
+            sql.append(" and bd.id_status = :purchaseType ");
+            params.put("purchaseType", purchaseType);
+        } else {
+            sql.append(" and bd.id_status <> :purchaseType ");
+            params.put("purchaseType", Const.PURCHASE_TYPE.ORDER);
+        }
+        sql.append(" and p.id_user = :sellerId ");
+        params.put("sellerId", sellerId);
+
+        Query query = em.createNativeQuery(sql.toString());
+        query.setMaxResults(pageable.getPageSize());
+        query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+        List<Object[]> queryResult = query.getResultList();
+
+        List<IdBillDetailSdo> result = DataUtil.getResultFromListObjects(queryResult, IdBillDetailSdo.class.getCanonicalName());
+
+        return result;
+    }
+
+    @Override
+    public Long countIdBillDetailSellerPagination(Long sellerId, Long purchaseType) {
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT COUNT(1) ");
+        sql.append(" from bill_detail bd ");
+        sql.append(" join product p ");
+        sql.append(" on bd.id_product = p.id ");
+        if (purchaseType != Const.PURCHASE_TYPE.ALL) {
+            sql.append(" and bd.id_status = :purchaseType ");
+            params.put("purchaseType", purchaseType);
+        } else {
+            sql.append(" and bd.id_status <> :purchaseType ");
+            params.put("purchaseType", Const.PURCHASE_TYPE.ORDER);
+        }
+        sql.append(" and p.id_user = :sellerId ");
+        params.put("sellerId", sellerId);
+
         Query query = em.createNativeQuery(sql.toString());
 
         params.forEach((key, value) -> query.setParameter(key, value));

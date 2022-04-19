@@ -64,6 +64,10 @@ public class BillDetailServiceImpl implements BillDetailService {
 
             billDetailSdo.setQuantity(item.getQuantity());
 
+            billDetailSdo.setPurchaseType(item.getPurchaseType());
+
+            billDetailSdo.setSellerId(item.getSellerId());
+
             if (!DataUtil.isNullOrZero(item.getAddressId())) {
                 Address address = addressService.getAddressById(item.getAddressId());
                 billDetailSdo.setAddress(address.getAddress());
@@ -109,11 +113,11 @@ public class BillDetailServiceImpl implements BillDetailService {
 
     @Override
     public Page<BillDetailSdo> getListBillByUserAndStatus(String token, Long purchaseType, Pageable pageable) throws JsonProcessingException {
-        Long userId = userService.getUserIdByBearerToken(token);
+        UserSdo user = userService.getUserByBearerToken(token);
+        Long userId = user.getId();
 
-        if (DataUtil.isNullOrZero(purchaseType)) { List<String> errParams = new ArrayList<>();
-            errParams.add(DataUtil.safeToString(purchaseType));
-            throw new AppException("API-BILL003", "Không tồn tại trạng thái đơn hàng = " + purchaseType);
+        if (purchaseType == null) {
+            throw new AppException("API-BILL013", "Lấy danh sách đơn hàng thất bại!");
         }
 
         List<BillDetailSdo> listBillDetail = new ArrayList<>();
@@ -123,21 +127,70 @@ public class BillDetailServiceImpl implements BillDetailService {
             BillDetailSdo billDetail = new BillDetailSdo();
             billDetail.setBillId(item.getBillId());
             billDetail.setQuantity(item.getQuantity());
+            billDetail.setPurchaseType(item.getPurchaseType());
+            billDetail.setSellerId(item.getSellerId());
+            billDetail.setSeller(user.getFullName());
 
             if (!DataUtil.isNullOrZero(item.getAddressId())) {
                 Address address = addressService.getAddressById(item.getAddressId());
-                billDetail.setAddress(address.getAddress());
+                if (address != null) {
+                    billDetail.setAddress(address.getAddress());
+                }
             }
 
             if (!DataUtil.isNullOrZero(item.getProductId())) {
                 ProductSdo product = productRepo.getProductById(item.getProductId());
-                billDetail.setProduct(product);
+                if (product != null) {
+                    billDetail.setProduct(product);
+                }
             }
 
             listBillDetail.add(billDetail);
         });
 
-        Long count = billDetailRepo.countBillDetailOfUserAndProduct(userId, purchaseType);
+        Long count = billDetailRepo.countIdBillDetailPagination(userId, purchaseType);
+
+        return new PageImpl<>(listBillDetail, pageable , count);
+    }
+
+    @Override
+    public Page<BillDetailSdo> getListBillBySellerAndStatus(String token, Long purchaseType, Pageable pageable) throws JsonProcessingException {
+        UserSdo user = userService.getUserByBearerToken(token);
+        Long userId = user.getId();
+
+        if (purchaseType == null) {
+            throw new AppException("API-BILL013", "Lấy danh sách đơn hàng thất bại!");
+        }
+
+        List<BillDetailSdo> listBillDetail = new ArrayList<>();
+
+        List<IdBillDetailSdo> listIdBillDetail = billDetailRepo.getListIdBillDetailSellerPagination(userId, purchaseType, pageable);
+        listIdBillDetail.forEach(item -> {
+            BillDetailSdo billDetail = new BillDetailSdo();
+            billDetail.setBillId(item.getBillId());
+            billDetail.setQuantity(item.getQuantity());
+            billDetail.setPurchaseType(item.getPurchaseType());
+            billDetail.setSellerId(item.getSellerId());
+            billDetail.setSeller(user.getFullName());
+
+            if (!DataUtil.isNullOrZero(item.getAddressId())) {
+                Address address = addressService.getAddressById(item.getAddressId());
+                if (address != null) {
+                    billDetail.setAddress(address.getAddress());
+                }
+            }
+
+            if (!DataUtil.isNullOrZero(item.getProductId())) {
+                ProductSdo product = productRepo.getProductById(item.getProductId());
+                if (product != null) {
+                    billDetail.setProduct(product);
+                }
+            }
+
+            listBillDetail.add(billDetail);
+        });
+
+        Long count = billDetailRepo.countIdBillDetailSellerPagination(userId, purchaseType);
 
         return new PageImpl<>(listBillDetail, pageable , count);
     }
@@ -200,15 +253,16 @@ public class BillDetailServiceImpl implements BillDetailService {
 
         Long userId = userService.getUserIdByBearerToken(token);
 
-        BillDetail billDetail = billDetailRepo.findById(billId).get();
-        if (DataUtil.isNullOrZero(billDetail.getId())) {
+        BillDetail billDetail = billDetailRepo.findById(billId).orElseGet(() -> {
             throw new AppException("API-BILL002", "Đơn hàng không tồn tại!");
-        }
+        });
 
         billDetail.setStatusId(statusId);
         billDetail.setUpdatedAt(new Date());
 
-        Product product = productRepo.findById(billDetail.getProductId()).get();
+        Product product = productRepo.findById(billDetail.getProductId()).orElseGet(() -> {
+            throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+        });
         if (product.getIsSell() == 0) {
             throw new AppException("API-PRD002", "Sản phẩm hiện không được bán nữa!");
         }

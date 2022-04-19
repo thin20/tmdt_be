@@ -1,6 +1,5 @@
 package com.example.tmdt_be.service.sdo;
 
-import com.example.tmdt_be.domain.Address;
 import lombok.*;
 
 @Setter
@@ -14,4 +13,5 @@ public class IdBillDetailSdo {
     private Long sellerId;
     private Long addressId;
     private Long productId;
+    private Long purchaseType;
 }

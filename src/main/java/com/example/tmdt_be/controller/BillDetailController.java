@@ -40,6 +40,16 @@ public class BillDetailController {
         return ResponseEntity.ok(PagedResponse.builder().page(result).build());
     }
 
+    @GetMapping(value="listBillOfSeller")
+    ResponseEntity<PagedResponse<BillDetailSdo>> listBillOfSeller(@RequestHeader("Authorization") String token,
+                                                                  @RequestParam(value="purchaseType", required = false) Long purchaseType,
+                                                                  @PageableDefault Pageable pageable) throws JsonProcessingException {
+        Page<BillDetailSdo> result = billDetailService.getListBillBySellerAndStatus(token, purchaseType, pageable);
+
+        return ResponseEntity.ok(PagedResponse.builder().page(result).build());
+    }
+
+
     @GetMapping(value="countTotalProductSold")
     ResponseEntity<Long> countTotalProductSold(@RequestParam(value = "productId", required = true) Long productId) {
         return ResponseEntity.ok(billDetailService.countTotalProductSold(productId));

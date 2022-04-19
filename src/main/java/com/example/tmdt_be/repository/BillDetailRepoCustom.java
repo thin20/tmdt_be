@@ -17,6 +17,10 @@ public interface BillDetailRepoCustom {
 
     Long countIdBillDetailPagination(Long userId, Long purchaseType);
 
+    List<IdBillDetailSdo> getListIdBillDetailSellerPagination(Long sellerId, Long purchaseType, Pageable pageable);
+
+    Long countIdBillDetailSellerPagination(Long userId, Long purchaseType);
+
     BillDetail getBillById(Long billId, Long statusId);
 
     BillDetail getBillByUserAndProduct(Long userId, Long productId, Long statusId);

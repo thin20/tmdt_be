@@ -20,6 +20,8 @@ public interface BillDetailService {
 
     Page<BillDetailSdo> getListBillByUserAndStatus(String token, Long purchaseType, Pageable pageable) throws JsonProcessingException;
 
+    Page<BillDetailSdo> getListBillBySellerAndStatus(String token, Long purchaseType, Pageable pageable) throws JsonProcessingException;
+
     BillDetail getBillById(Long billId, Long statusId);
 
     BillDetail getBillByUserAndProduct(Long userId, Long productId);
