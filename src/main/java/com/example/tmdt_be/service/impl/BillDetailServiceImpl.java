@@ -280,10 +280,9 @@ public class BillDetailServiceImpl implements BillDetailService {
         if (statusId == Const.PURCHASE_TYPE.DELIVERING) {
             if (!isAdmin) throw new AppException("API-BILL004", "Không có quyền cập nhật trạng thái đơn hàng!");
             if (billDetail.getQuantity() > product.getQuantity()) throw new AppException("API-BILL005", "Số lượng sản phẩm trong đơn hàng lớn hơn số lượng sản phẩm có sẵn trong kho!");
-            if (!DataUtil.isNullOrZero(product.getIsSell())) throw new AppException("API-PRD002", "Sản phẩm hiện không được bán nữa!");
+            if (DataUtil.isNullOrZero(product.getIsSell())) throw new AppException("API-PRD002", "Sản phẩm hiện không được bán nữa!");
             Long quantity = product.getQuantity() - billDetail.getQuantity();
             product.setQuantity(quantity);
-            product.setCreatedAt(new Date());
             productRepo.save(product);
         } else if (statusId == Const.PURCHASE_TYPE.ORDER | statusId == Const.PURCHASE_TYPE.WAIT_CONFIRM | statusId == Const.PURCHASE_TYPE.DELIVERED | statusId == Const.PURCHASE_TYPE.CANCELED) {
             if (!isClient) throw new AppException("API-BILL004", "Không có quyền cập nhật trạng thái đơn hàng!");
