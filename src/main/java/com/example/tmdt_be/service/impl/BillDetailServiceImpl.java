@@ -5,6 +5,7 @@ import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.domain.Address;
 import com.example.tmdt_be.domain.BillDetail;
 import com.example.tmdt_be.domain.Product;
+import com.example.tmdt_be.domain.User;
 import com.example.tmdt_be.repository.BillDetailRepo;
 import com.example.tmdt_be.repository.ProductRepo;
 import com.example.tmdt_be.service.AddressService;
@@ -124,12 +125,20 @@ public class BillDetailServiceImpl implements BillDetailService {
 
         List<IdBillDetailSdo> listIdBillDetail = billDetailRepo.getListIdBillDetailPagination(userId, purchaseType, pageable);
         listIdBillDetail.forEach(item -> {
+            Long sellerId = item.getSellerId();
+            UserSdo seller = userService.findById(sellerId);
+
             BillDetailSdo billDetail = new BillDetailSdo();
             billDetail.setBillId(item.getBillId());
             billDetail.setQuantity(item.getQuantity());
             billDetail.setPurchaseType(item.getPurchaseType());
-            billDetail.setSellerId(item.getSellerId());
-            billDetail.setSeller(user.getFullName());
+            billDetail.setSellerId(sellerId);
+
+            if (!DataUtil.isNullOrEmpty(seller.getShobbeName())) {
+                billDetail.setSeller(seller.getShobbeName());
+            } else {
+                billDetail.setSeller(seller.getFullName());
+            }
 
             if (!DataUtil.isNullOrZero(item.getAddressId())) {
                 Address address = addressService.getAddressById(item.getAddressId());
