@@ -1,8 +1,11 @@
 package com.example.tmdt_be.service.impl;
 
+import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.domain.ImageProduct;
 import com.example.tmdt_be.repository.ImageProductRepo;
 import com.example.tmdt_be.service.ImageProductService;
+import com.example.tmdt_be.service.exception.AppException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,5 +27,19 @@ public class ImageProductServiceImpl implements ImageProductService {
     @Override
     public List<ImageProduct> getListImageProductByProductId(Long productId) {
         return imageProductRepo.getListImageProductByProductId(productId);
+    }
+
+    @Override
+    public Boolean saveImageProduct(Long productId, String path) throws JsonProcessingException {
+        if (DataUtil.isNullOrZero(productId) | DataUtil.isNullOrEmpty(path)) {
+            throw new AppException("API-PRD004", "Thêm mới ảnh mô tả sản phẩm thất bại!");
+        }
+
+        ImageProduct imageProduct = new ImageProduct();
+        imageProduct.setProductId(productId);
+        imageProduct.setPath(path);
+        imageProductRepo.save(imageProduct);
+
+        return true;
     }
 }

@@ -11,10 +11,9 @@ import com.example.tmdt_be.service.sdi.MediaFileSdi;
 import com.example.tmdt_be.service.sdo.AmazonUploadSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
+import com.amazonaws.AmazonServiceException;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -96,10 +95,22 @@ public class AmazonUploadServiceImpl implements AmazonUploadService {
         try {
             String fileName = generateFileName(multipartFile);
             fileUrl = endpointUrl + "/" + bucketName + "/" + fileName;
-            uploadFileTos3bucket(fileName, multipartFile);
+            if (this.isExists(fileName) == false) {
+                uploadFileTos3bucket(fileName, multipartFile);
+            }
         } catch (Exception e) {
             throw new AppException("API-UPL001", "Upload files thất bại!");
         }
         return fileUrl;
+    }
+
+    @Override
+    public Boolean isExists(String fileName) {
+        try {
+            s3client.getObjectMetadata(bucketName, endpointUrl + "/" + bucketName + "/" + fileName);
+        } catch(AmazonServiceException e) {
+            return false;
+        }
+        return true;
     }
 }
