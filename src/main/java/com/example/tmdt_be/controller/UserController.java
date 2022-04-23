@@ -52,4 +52,10 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUserInfo(token, sdi, files));
     }
 
+    @PostMapping(value="changeAvatar")
+    public ResponseEntity<Boolean> changeAvatar(@RequestPart ("avatar") MultipartFile avatar,
+                                                @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(userService.changeAvatar(token, avatar));
+    }
+
 }

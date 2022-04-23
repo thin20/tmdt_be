@@ -31,4 +31,6 @@ public interface UserService {
     Boolean changePassword(String token, ChangePasswordSdi sdi) throws JsonProcessingException;
 
     Boolean updateUserInfo(String token, UpdateUserInfoSdi sdi, List<MultipartFile> files) throws JsonProcessingException;
+
+    Boolean changeAvatar(String token, MultipartFile avatar) throws JsonProcessingException;
 }

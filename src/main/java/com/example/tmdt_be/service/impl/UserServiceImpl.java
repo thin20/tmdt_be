@@ -5,6 +5,7 @@ import com.example.tmdt_be.domain.Address;
 import com.example.tmdt_be.domain.User;
 import com.example.tmdt_be.repository.AddressRepo;
 import com.example.tmdt_be.repository.UserRepo;
+import com.example.tmdt_be.service.AmazonUploadService;
 import com.example.tmdt_be.service.EncryptService;
 import com.example.tmdt_be.service.TokenService;
 import com.example.tmdt_be.service.UserService;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +31,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private static EncryptService encryptService;
     private static TokenService tokenService;
+    private static AmazonUploadService amazonUploadService;
 
     @Autowired
     UserRepo userRepository;
@@ -37,9 +40,10 @@ public class UserServiceImpl implements UserService {
     AddressRepo addressRepo;
 
     @Autowired
-    public UserServiceImpl(EncryptService encryptService, TokenService tokenService) {
+    public UserServiceImpl(EncryptService encryptService, TokenService tokenService, AmazonUploadService amazonUploadService) {
         this.encryptService = encryptService;
         this.tokenService = tokenService;
+        this.amazonUploadService = amazonUploadService;
     }
 
     @Override
@@ -227,6 +231,28 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         // TODO: upload files
+
+        return true;
+    }
+
+    @Override
+    public Boolean changeAvatar(String token, MultipartFile avatar) throws JsonProcessingException {
+        if (DataUtil.isNullOrEmpty((Collection<?>) avatar)) {
+            throw new AppException("API-UPL001", "Upload files thất bại!");
+        }
+        Long userId = this.getUserIdByBearerToken(token);
+
+        User user = userRepository.findById(userId).orElseGet(() -> {
+            throw new AppException("API-USR008", "User không tồn tại!");
+        });
+
+        String fileUrl = amazonUploadService.uploadFile(avatar);
+        if (DataUtil.isNullOrEmpty(fileUrl)) {
+            throw new AppException("API-USR011", "Cập nhật avatar thất bại!");
+        }
+
+        user.setImage(fileUrl);
+        userRepository.save(user);
 
         return true;
     }
