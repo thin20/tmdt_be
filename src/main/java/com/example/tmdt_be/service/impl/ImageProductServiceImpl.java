@@ -42,4 +42,13 @@ public class ImageProductServiceImpl implements ImageProductService {
 
         return true;
     }
+
+    @Override
+    public Boolean removeImageProduct(Long productId, String path) throws JsonProcessingException {
+        if (DataUtil.isNullOrZero(productId) | DataUtil.isNullOrEmpty(path)) {
+            throw new AppException("API-PRD010", "Xóa ảnh của sản phẩm thất bại!");
+        }
+
+        return imageProductRepo.removeImageProductByProductIdAndPath(productId, path);
+    }
 }

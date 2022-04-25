@@ -3,9 +3,7 @@ package com.example.tmdt_be.controller;
 import com.example.tmdt_be.common.Const;
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.service.ProductService;
-import com.example.tmdt_be.service.sdi.CreateProductSdi;
-import com.example.tmdt_be.service.sdi.SearchProductBySellerSdi;
-import com.example.tmdt_be.service.sdi.SearchProductSdi;
+import com.example.tmdt_be.service.sdi.*;
 import com.example.tmdt_be.service.sdo.ProductDetailSdo;
 import com.example.tmdt_be.service.sdo.ProductSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -88,5 +86,29 @@ public class ProductController {
                                                     @RequestHeader("Authorization") String token) throws JsonProcessingException {
         sdi.setImages(images);
         return ResponseEntity.ok(productService.createProduct(token, sdi));
+    }
+
+    @PostMapping(value="updateProduct")
+    public ResponseEntity<ProductSdo> updateProduct(@Valid @RequestBody UpdateProductSdi sdi,
+                                                    @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(productService.updateProduct(token, sdi));
+    }
+
+    @PostMapping(value="changeImageProduct")
+    public ResponseEntity<Boolean> changeImageProduct(@Valid @RequestBody ChangeImageProductSdi sdi,
+                                                      @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(productService.changeImageProduct(token, sdi));
+    }
+
+    @PostMapping(value="removeImageProduct")
+    public ResponseEntity<Boolean> removeImageProduct(@Valid @RequestBody RemoveImageProductSdi sdi,
+                                                      @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(productService.removeImageProduct(token, sdi));
+    }
+
+    @PutMapping(value="changeStatusSell")
+    public ResponseEntity<Boolean> changeStatusSell(@Valid @RequestBody ChangeStatusSellSdi sdi,
+                                                    @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(productService.changeStatusSell(token, sdi));
     }
 }

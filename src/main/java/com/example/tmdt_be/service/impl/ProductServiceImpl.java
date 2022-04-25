@@ -8,10 +8,7 @@ import com.example.tmdt_be.domain.Product;
 import com.example.tmdt_be.repository.ProductRepo;
 import com.example.tmdt_be.service.*;
 import com.example.tmdt_be.service.exception.AppException;
-import com.example.tmdt_be.service.sdi.CreateProductSdi;
-import com.example.tmdt_be.service.sdi.LikeProductSdi;
-import com.example.tmdt_be.service.sdi.SearchProductBySellerSdi;
-import com.example.tmdt_be.service.sdi.SearchProductSdi;
+import com.example.tmdt_be.service.sdi.*;
 import com.example.tmdt_be.service.sdo.ProductDetailSdo;
 import com.example.tmdt_be.service.sdo.ProductSdo;
 import com.example.tmdt_be.service.sdo.UserSdo;
@@ -231,5 +228,130 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return product.toProductSdo();
+    }
+
+    @Override
+    public ProductSdo updateProduct(String token, UpdateProductSdi sdi) throws JsonProcessingException {
+        Long userId = userService.getUserIdByBearerToken(token);
+
+        Long productId = sdi.getProductId();
+        String productName = sdi.getProductName();
+        Double price = sdi.getPrice();
+        Long quantity = sdi.getQuantity();
+        Long discount = sdi.getDiscount();
+        String description = sdi.getDescription();
+
+        if (DataUtil.isNullOrZero(productId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(quantity) | DataUtil.isNullOrZero(discount)) {
+            throw new AppException("API-PRD008", "Cập nhật sản phẩm thất bại!");
+        }
+
+        Product product = productRepo.findById(productId).orElseGet(() -> {
+            throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+        });
+
+        if (product.getUserId() != userId) {
+            throw new AppException("API-PRD009", "Không có quyền cập nhật sản phẩm!");
+        }
+
+        product.setName(productName);
+        product.setPrice(price);
+        product.setQuantity(quantity);
+        product.setDiscount(discount);
+        product.setDescription(description);
+        product.setUpdatedAt(new Date());
+
+        productRepo.save(product);
+
+        return product.toProductSdo();
+    }
+
+    @Override
+    public Boolean changeImageProduct(String token, ChangeImageProductSdi sdi) throws JsonProcessingException {
+        Long userId = userService.getUserIdByBearerToken(token);
+
+        Long productId = sdi.getProductId();
+        MultipartFile newImage = sdi.getNewImage();
+        String oldPathImage = sdi.getOldPathImage();
+
+        if (DataUtil.isNullOrZero(productId) | newImage == null | DataUtil.isNullOrEmpty(oldPathImage)) {
+            throw new AppException("API-PRD012", "Cập nhật ảnh của sản phẩm thất bại!");
+        }
+
+        Product product = productRepo.findById(productId).orElseGet(() -> {
+            throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+        });
+
+        if (product.getUserId() != userId) {
+            throw new AppException("API-PRD011", "Không có quyền cập nhật ảnh của sản phẩm!");
+        }
+
+        String newPathImage = amazonUploadService.uploadFile(newImage);
+
+        if (oldPathImage.equals(product.getImage())) {
+            product.setImage(newPathImage);
+            product.setUpdatedAt(new Date());
+            productRepo.save(product);
+        } else {
+            imageProductService.removeImageProduct(productId, oldPathImage);
+            imageProductService.saveImageProduct(productId, newPathImage);
+        }
+
+        return true;
+    }
+
+    @Override
+    public Boolean removeImageProduct(String token, RemoveImageProductSdi sdi) throws JsonProcessingException {
+        Long userId = userService.getUserIdByBearerToken(token);
+
+        Long productId = sdi.getProductId();
+        String pathImage = sdi.getPathImage();
+
+        if (DataUtil.isNullOrZero(productId) | DataUtil.isNullOrEmpty(pathImage)) {
+            throw new AppException("API-PRD010", "Xóa ảnh của sản phẩm thất bại!");
+        }
+
+        Product product = productRepo.findById(productId).orElseGet(() -> {
+            throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+        });
+
+        if (product.getUserId() == userId) {
+            throw new AppException("API-PRD013", "Không có quyền xóa ảnh của sản phẩm!");
+        }
+
+        if (pathImage.equals(product.getImage())) {
+            throw new AppException("API-PRD014", "Không thể xóa ảnh chính của sản phẩm!");
+        }
+
+        return imageProductService.removeImageProduct(productId, pathImage);
+    }
+
+    @Override
+    public Boolean changeStatusSell(String token, ChangeStatusSellSdi sdi) throws JsonProcessingException {
+        Long userId = userService.getUserIdByBearerToken(token);
+
+        Long productId = sdi.getProductId();
+        if (DataUtil.isNullOrZero(productId)) {
+            throw new AppException("API-PRD006", "Đổi trạng thái sản phẩm thành công!");
+        }
+
+        Product product = productRepo.findById(productId).orElseGet(() -> {
+            throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+        });
+
+        if (product.getUserId() != userId) {
+            throw new AppException("API-PRD007", "Không có quyền cập nhật trạng thái sản phẩm!");
+        }
+
+        Integer isSell = product.getIsSell();
+        if (DataUtil.isNullOrZero(isSell)) {
+            isSell = 1;
+        } else {
+            isSell = 0;
+        }
+
+        product.setIsSell(isSell);
+        productRepo.save(product);
+        
+        return true;
     }
 }
