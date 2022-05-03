@@ -80,11 +80,11 @@ public class ProductController {
         return ResponseEntity.ok(PagedResponse.builder().page(result).build());
     }
 
-    @PostMapping(value="createProduct")
-    public ResponseEntity<ProductSdo> createProduct(@Valid @RequestBody CreateProductSdi sdi,
-                                                    @RequestPart(value = "images", required = false) List<MultipartFile> images,
+    @PostMapping(value="createProduct",consumes = {"multipart/form-data"})
+    public ResponseEntity<ProductSdo> createProduct(@Valid @RequestPart CreateProductSdi sdi,
+                                                    @RequestPart(value = "listImage", required = false) List<MultipartFile> listImage,
                                                     @RequestHeader("Authorization") String token) throws JsonProcessingException {
-        sdi.setImages(images);
+        sdi.setImages(listImage);
         return ResponseEntity.ok(productService.createProduct(token, sdi));
     }
 
@@ -95,8 +95,10 @@ public class ProductController {
     }
 
     @PostMapping(value="changeImageProduct")
-    public ResponseEntity<Boolean> changeImageProduct(@Valid @RequestBody ChangeImageProductSdi sdi,
+    public ResponseEntity<Boolean> changeImageProduct(@Valid @RequestPart ChangeImageProductSdi sdi,
+                                                      @RequestPart(value = "image", required = false) MultipartFile image,
                                                       @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        sdi.setNewImage(image);
         return ResponseEntity.ok(productService.changeImageProduct(token, sdi));
     }
 
