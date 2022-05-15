@@ -12,12 +12,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateProductSdi {
-    private Long categoryId;
-    private String productName;
-    private Long quantity;
-    private Double price;
-    private Long discount;
-    private List<String> imagesPath;
-    private String description;
+public class AmazonUploadFilesSdi {
+    private List<MultipartFile> files;
 }

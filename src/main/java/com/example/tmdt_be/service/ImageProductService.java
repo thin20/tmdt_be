@@ -14,4 +14,6 @@ public interface ImageProductService {
     Boolean saveImageProduct(Long productId, String path) throws JsonProcessingException;
 
     Boolean removeImageProduct(Long productId, String path) throws JsonProcessingException;
+
+    Boolean removeImageProductById(Long id) throws JsonProcessingException;
 }

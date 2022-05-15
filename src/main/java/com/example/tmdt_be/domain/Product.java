@@ -76,19 +76,31 @@ public class Product {
         productSdo.setQuantity(this.getQuantity());
         productSdo.setDiscount(this.getDiscount());
         productSdo.setPrice(this.getPrice());
-        productSdo.setDescription(this.getDescription());
-        productSdo.setTitle(this.getTitle());
+        if (!DataUtil.isNullOrEmpty(this.getDescription())) {
+            productSdo.setDescription(this.getDescription());
+        }
+        if (!DataUtil.isNullOrEmpty(this.getTitle())) {
+            productSdo.setTitle(this.getTitle());
+        }
         productSdo.setNumberOfStar(this.getNumberOfStar());
-        productSdo.setAddress(this.getAddress());
+        if (!DataUtil.isNullOrEmpty(this.getAddress())) {
+            productSdo.setAddress(this.getAddress());
+        }
         productSdo.setImage(this.getImage());
         if (!DataUtil.isNullOrZero(this.getIsSell())) {
             productSdo.setIsSell(1L);
         } else {
             productSdo.setIsSell(0L);
         }
-        productSdo.setCreatedAt(this.getCreatedAt().toString());
-        productSdo.setUpdatedAt(this.getUpdatedAt().toString());
-        productSdo.setDeletedAt(this.getDeletedAt().toString());
+        if (this.getCreatedAt() != null && !DataUtil.isNullOrEmpty(this.getCreatedAt().toString())) {
+            productSdo.setCreatedAt(this.getCreatedAt().toString());
+        }
+        if (this.getUpdatedAt() != null && !DataUtil.isNullOrEmpty(this.getUpdatedAt().toString())) {
+            productSdo.setUpdatedAt(this.getUpdatedAt().toString());
+        }
+        if (this.getDeletedAt() != null && !DataUtil.isNullOrEmpty(this.getDeletedAt().toString())) {
+            productSdo.setDeletedAt(this.getDeletedAt().toString());
+        }
 
         return productSdo;
     }

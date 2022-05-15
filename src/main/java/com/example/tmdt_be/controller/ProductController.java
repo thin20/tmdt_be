@@ -80,12 +80,10 @@ public class ProductController {
         return ResponseEntity.ok(PagedResponse.builder().page(result).build());
     }
 
-    @PostMapping(value="createProduct",consumes = {"multipart/form-data"})
-    public ResponseEntity<ProductSdo> createProduct(@Valid @RequestPart CreateProductSdi sdi,
-                                                    @RequestPart(value = "listImage", required = false) List<MultipartFile> listImage,
+    @PostMapping(value="createProduct")
+    public ResponseEntity<ProductSdo> createProduct(@Valid @RequestBody CreateProductSdi product,
                                                     @RequestHeader("Authorization") String token) throws JsonProcessingException {
-        sdi.setImages(listImage);
-        return ResponseEntity.ok(productService.createProduct(token, sdi));
+        return ResponseEntity.ok(productService.createProduct(token, product));
     }
 
     @PostMapping(value="updateProduct")

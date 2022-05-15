@@ -129,6 +129,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         }
         sql.append(" and bd.id_user = :userId ");
         params.put("userId", userId);
+        sql.append(" order by DATE(bd.updated_at) DESC ");
 
         Query query = em.createNativeQuery(sql.toString());
         query.setMaxResults(pageable.getPageSize());
@@ -198,6 +199,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         }
         sql.append(" and p.id_user = :sellerId ");
         params.put("sellerId", sellerId);
+        sql.append(" order by DATE(bd.updated_at) DESC ");
 
         Query query = em.createNativeQuery(sql.toString());
         query.setMaxResults(pageable.getPageSize());

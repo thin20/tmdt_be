@@ -420,9 +420,6 @@ public class BillDetailServiceImpl implements BillDetailService {
                 throw new AppException("API-PRD003", "Số lượng sản phẩm trong giỏ hàng chỉ còn " + product.getQuantity() +" sản phẩm!");
             }
 
-            product.setQuantity(billDetail.getQuantity() - quantityBuy);
-            productRepo.save(product);
-
             billDetail.setStatusId(Const.PURCHASE_TYPE.WAIT_CONFIRM);
             billDetail.setAddressId(finalAddressId);
             billDetailRepo.save(billDetail);

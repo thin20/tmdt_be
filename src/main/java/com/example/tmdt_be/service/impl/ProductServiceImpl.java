@@ -116,10 +116,17 @@ public class ProductServiceImpl implements ProductService {
         }
         ProductDetailSdo productDetailSdo = new ProductDetailSdo();
 
-        List<ImageProduct> depicted = imageProductService.getListImageProductByProductId(productId);
-        productDetailSdo.setDepicted(depicted);
 
         ProductSdo productSdo = productRepo.getProductById(productId);
+
+        List<ImageProduct> depicted = imageProductService.getListImageProductByProductId(productId);
+        ImageProduct mainImage = new ImageProduct();
+        mainImage.setId(-1L);
+        mainImage.setProductId(productId);
+        mainImage.setPath(productSdo.getImage());
+
+        depicted.add(0, mainImage);
+        productDetailSdo.setDepicted(depicted);
 
         Long sold = billDetailService.countTotalProductSold(productId);
         productSdo.setSold(sold);
@@ -181,6 +188,11 @@ public class ProductServiceImpl implements ProductService {
         List<ProductSdo> listProduct = productRepo.searchListProductBySeller(userId, sdi);
         Long countItem = productRepo.countItemListProductBySeller(userId,sdi);
 
+        listProduct.forEach(product -> {
+            Long sold = billDetailService.countTotalProductSold(product.getId());
+            product.setSold(sold);
+        });
+
         return new PageImpl<>(listProduct, pageable, countItem);
     }
 
@@ -192,39 +204,41 @@ public class ProductServiceImpl implements ProductService {
         Long quantity = sdi.getQuantity();
         Double price = sdi.getPrice();
         Long discount = sdi.getDiscount();
-        List<MultipartFile> images = sdi.getImages();
+        List<String> imagesPath = sdi.getImagesPath();
         String description = sdi.getDescription();
 
-        if (DataUtil.isNullOrZero(categoryId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(discount) | DataUtil.isNullOrEmpty(images)) {
+        if (DataUtil.isNullOrZero(categoryId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(discount) | DataUtil.isNullOrEmpty(imagesPath)) {
             throw new AppException("API-PRD005", "Thêm mới sản phẩm thất bại!");
         }
 
-        MultipartFile mainImage = images.get(0);
-        String imagePath = amazonUploadService.uploadFile(mainImage);
+        String imagePath = imagesPath.get(0);
 
         Product product = new Product();
         product.setName(productName);
         product.setCategoryId(categoryId);
         product.setUserId(user.getId());
         product.setQuantity(quantity);
-        product.setPrice(price);
         product.setDiscount(discount);
+        product.setPrice(price);
         product.setDescription(description);
+        product.setTitle(productName);
         product.setNumberOfStar(5L);
         product.setImage(imagePath);
         product.setIsSell(1);
         product.setCreatedAt(new Date());
+        product.setUpdatedAt(new Date());
 
-        product = productRepo.save(product);
+            product = productRepo.save(product);
         if (DataUtil.isNullOrZero(product.getId())) {
             throw new AppException("API-PRD005", "Thêm mới sản phẩm thất bại!");
         }
         Long productId = product.getId();
 
         // Save images products
-        for (int i = 1; i <= images.size(); i++) {
-            String imgPath = amazonUploadService.uploadFile(images.get(i));
-            imageProductService.saveImageProduct(productId, imagePath);
+        if (imagesPath.size() > 1) {
+            for (int i = 1; i < imagesPath.size(); i++) {
+                imageProductService.saveImageProduct(productId, imagesPath.get(i));
+            }
         }
 
         return product.toProductSdo();
@@ -239,9 +253,13 @@ public class ProductServiceImpl implements ProductService {
         Double price = sdi.getPrice();
         Long quantity = sdi.getQuantity();
         Long discount = sdi.getDiscount();
+        String imagePath = sdi.getImagePath();
         String description = sdi.getDescription();
+        List<Long> fileIdRemove = sdi.getFileIdRemove();
+        List<String> imagesPath = sdi.getImagesPath();
 
-        if (DataUtil.isNullOrZero(productId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(quantity) | DataUtil.isNullOrZero(discount)) {
+
+        if (DataUtil.isNullOrZero(productId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(quantity) | DataUtil.isNullOrZero(discount) | DataUtil.isNullOrEmpty(imagePath)) {
             throw new AppException("API-PRD008", "Cập nhật sản phẩm thất bại!");
         }
 
@@ -257,10 +275,26 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(price);
         product.setQuantity(quantity);
         product.setDiscount(discount);
+        product.setImage(imagePath);
         product.setDescription(description);
         product.setUpdatedAt(new Date());
 
         productRepo.save(product);
+
+        fileIdRemove.forEach(id -> {
+            try {
+                imageProductService.removeImageProductById(id);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        });
+
+
+        if (imagesPath.size() > 0) {
+            for (int i = 0; i < imagesPath.size(); i++) {
+                imageProductService.saveImageProduct(productId, imagesPath.get(i));
+            }
+        }
 
         return product.toProductSdo();
     }

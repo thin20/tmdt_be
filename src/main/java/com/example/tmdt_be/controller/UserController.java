@@ -1,10 +1,7 @@
 package com.example.tmdt_be.controller;
 
 import com.example.tmdt_be.service.UserService;
-import com.example.tmdt_be.service.sdi.ChangePasswordSdi;
-import com.example.tmdt_be.service.sdi.CreateUserSdi;
-import com.example.tmdt_be.service.sdi.LoginByPhoneNumberSdi;
-import com.example.tmdt_be.service.sdi.UpdateUserInfoSdi;
+import com.example.tmdt_be.service.sdi.*;
 import com.example.tmdt_be.service.sdo.UserSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -53,9 +50,9 @@ public class UserController {
     }
 
     @PostMapping(value="changeAvatar")
-    public ResponseEntity<Boolean> changeAvatar(@RequestPart ("avatar") MultipartFile avatar,
+    public ResponseEntity<Boolean> changeAvatar(@RequestBody ChangeAvatarSdi sdi,
                                                 @RequestHeader("Authorization") String token) throws JsonProcessingException {
-        return ResponseEntity.ok(userService.changeAvatar(token, avatar));
+        return ResponseEntity.ok(userService.changeAvatar(token, sdi));
     }
 
 }

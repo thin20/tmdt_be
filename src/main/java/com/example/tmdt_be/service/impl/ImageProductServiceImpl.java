@@ -51,4 +51,19 @@ public class ImageProductServiceImpl implements ImageProductService {
 
         return imageProductRepo.removeImageProductByProductIdAndPath(productId, path);
     }
+
+    @Override
+    public Boolean removeImageProductById(Long id) throws JsonProcessingException {
+        if (DataUtil.isNullOrZero(id)) {
+            throw new AppException("API-PRD010", "Xóa ảnh của sản phẩm thất bại!");
+        }
+
+        ImageProduct imageProduct = imageProductRepo.findById(id).orElseGet(() -> {
+            throw new AppException("API-PRD010", "Không tồn tại ảnh!");
+        });
+
+        imageProductRepo.delete(imageProduct);
+
+        return true;
+    }
 }

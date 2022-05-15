@@ -10,10 +10,7 @@ import com.example.tmdt_be.service.EncryptService;
 import com.example.tmdt_be.service.TokenService;
 import com.example.tmdt_be.service.UserService;
 import com.example.tmdt_be.service.exception.AppException;
-import com.example.tmdt_be.service.sdi.ChangePasswordSdi;
-import com.example.tmdt_be.service.sdi.CreateUserSdi;
-import com.example.tmdt_be.service.sdi.LoginByPhoneNumberSdi;
-import com.example.tmdt_be.service.sdi.UpdateUserInfoSdi;
+import com.example.tmdt_be.service.sdi.*;
 import com.example.tmdt_be.service.sdo.UserSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -236,22 +233,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean changeAvatar(String token, MultipartFile avatar) throws JsonProcessingException {
-        if (DataUtil.isNullOrEmpty((Collection<?>) avatar)) {
-            throw new AppException("API-UPL001", "Upload files thất bại!");
+    public Boolean changeAvatar(String token, ChangeAvatarSdi sdi) throws JsonProcessingException {
+        String imagePath = sdi.getImagePath();
+        if (DataUtil.isNullOrEmpty(imagePath)) {
+            throw new AppException("API-USR011", "Cập nhật avatar thất bại!");
         }
+
         Long userId = this.getUserIdByBearerToken(token);
 
         User user = userRepository.findById(userId).orElseGet(() -> {
             throw new AppException("API-USR008", "User không tồn tại!");
         });
 
-        String fileUrl = amazonUploadService.uploadFile(avatar);
-        if (DataUtil.isNullOrEmpty(fileUrl)) {
-            throw new AppException("API-USR011", "Cập nhật avatar thất bại!");
-        }
-
-        user.setImage(fileUrl);
+        user.setImage(imagePath);
         userRepository.save(user);
 
         return true;
