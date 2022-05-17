@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -110,5 +109,10 @@ public class ProductController {
     public ResponseEntity<Boolean> changeStatusSell(@Valid @RequestBody ChangeStatusSellSdi sdi,
                                                     @RequestHeader("Authorization") String token) throws JsonProcessingException {
         return ResponseEntity.ok(productService.changeStatusSell(token, sdi));
+    }
+
+    @PutMapping(value="addProductVisit")
+    public ResponseEntity<Boolean> addProductVisit(@Valid @RequestBody AddProductVisitSdi sdi) throws JsonProcessingException {
+        return ResponseEntity.ok(productService.addProductVisit(sdi.getProductId()));
     }
 }

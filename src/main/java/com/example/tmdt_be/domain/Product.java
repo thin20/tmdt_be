@@ -55,6 +55,9 @@ public class Product {
     @Column(name="is_sell")
     private Integer isSell;
 
+    @Column(name="visit")
+    private Long visit;
+
     @Column(name="created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -76,6 +79,7 @@ public class Product {
         productSdo.setQuantity(this.getQuantity());
         productSdo.setDiscount(this.getDiscount());
         productSdo.setPrice(this.getPrice());
+        productSdo.setVisit(this.getVisit());
         if (!DataUtil.isNullOrEmpty(this.getDescription())) {
             productSdo.setDescription(this.getDescription());
         }

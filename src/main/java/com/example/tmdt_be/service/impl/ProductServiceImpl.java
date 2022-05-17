@@ -225,6 +225,7 @@ public class ProductServiceImpl implements ProductService {
         product.setNumberOfStar(5L);
         product.setImage(imagePath);
         product.setIsSell(1);
+        product.setVisit(0L);
         product.setCreatedAt(new Date());
         product.setUpdatedAt(new Date());
 
@@ -386,6 +387,20 @@ public class ProductServiceImpl implements ProductService {
         product.setIsSell(isSell);
         productRepo.save(product);
         
+        return true;
+    }
+
+    @Override
+    public Boolean addProductVisit(Long productId) throws JsonProcessingException {
+        Product product = productRepo.findById(productId).orElseGet(() -> {
+            throw new AppException("API-PRD001", "Sản phẩm không tồn tại!");
+        });
+
+        Long visit = product.getVisit() + 1L;
+        product.setVisit(visit);
+
+        productRepo.save(product);
+
         return true;
     }
 }

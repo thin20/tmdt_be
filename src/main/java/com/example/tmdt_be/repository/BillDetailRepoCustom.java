@@ -4,6 +4,7 @@ import com.example.tmdt_be.domain.BillDetail;
 import com.example.tmdt_be.service.sdo.IdBillDetailSdo;
 
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface BillDetailRepoCustom {
@@ -28,4 +29,6 @@ public interface BillDetailRepoCustom {
     Boolean updateQuantityProductInCart(Long billId, Long quantity);
 
     Boolean deleteProductInCart(Long billId);
+
+    List<IdBillDetailSdo> getListIdBillDetailSellerByDate (Long sellerId, String dateTime);
 }

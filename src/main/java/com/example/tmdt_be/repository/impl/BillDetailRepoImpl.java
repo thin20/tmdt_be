@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.springframework.data.domain.Pageable;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +89,8 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" bd.id_user as userId, ");
         sql.append(" bd.id_address as addressId, ");
         sql.append(" p.id as productId, ");
-        sql.append(" bd.id_status as purchaseType ");
+        sql.append(" bd.id_status as purchaseType, ");
+        sql.append(" p.price ");
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
@@ -116,7 +120,8 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" bd.id_user as userId, ");
         sql.append(" bd.id_address as addressId, ");
         sql.append(" p.id as productId, ");
-        sql.append(" bd.id_status as purchaseType ");
+        sql.append(" bd.id_status as purchaseType, ");
+        sql.append(" p.price ");
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
@@ -184,7 +189,8 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" bd.id_user as userId, ");
         sql.append(" bd.id_address as addressId, ");
         sql.append(" p.id as productId, ");
-        sql.append(" bd.id_status as purchaseType ");
+        sql.append(" bd.id_status as purchaseType, ");
+        sql.append(" p.price ");
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
@@ -364,5 +370,40 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         Object queryResult = query.executeUpdate();
 
         return queryResult != null;
+    }
+
+    @Override
+    public List<IdBillDetailSdo> getListIdBillDetailSellerByDate(Long sellerId, String dateTime) {
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT bd.id as billId, ");
+        sql.append(" bd.quantity as quantity, ");
+        sql.append(" p.id_user as sellerId, ");
+        sql.append(" bd.id_user as userId, ");
+        sql.append(" bd.id_address as addressId, ");
+        sql.append(" p.id as productId, ");
+        sql.append(" bd.id_status as purchaseType, ");
+        sql.append(" p.price ");
+        sql.append(" from bill_detail bd ");
+        sql.append(" join product p ");
+        sql.append(" on bd.id_product = p.id ");
+        sql.append(" and bd.id_status <> :purchaseType1 ");
+        params.put("purchaseType1", Const.PURCHASE_TYPE.ORDER);
+        sql.append(" and bd.id_status <> :purchaseType2 ");
+        params.put("purchaseType2", Const.PURCHASE_TYPE.CANCELED);
+        sql.append(" and p.id_user = :sellerId ");
+        params.put("sellerId", sellerId);
+        sql.append(" and DATE_FORMAT(bd.updated_at, '%Y/%m/%d') = :dateTime ");
+        params.put("dateTime", dateTime);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+        List<Object[]> queryResult = query.getResultList();
+
+        List<IdBillDetailSdo> result = DataUtil.getResultFromListObjects(queryResult, IdBillDetailSdo.class.getCanonicalName());
+
+        return result;
     }
 }

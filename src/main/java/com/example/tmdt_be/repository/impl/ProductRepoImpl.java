@@ -49,6 +49,7 @@ public class ProductRepoImpl implements ProductRepoCustom {
         sql.append(" 'false' as isLiked, ");
         sql.append(" 'false' as canComment, ");
         sql.append(" '[]' as categories, ");
+        sql.append(" visit, ");
         sql.append(" created_at, ");
         sql.append(" updated_at, ");
         sql.append(" deleted_at ");
@@ -151,6 +152,7 @@ public class ProductRepoImpl implements ProductRepoCustom {
         sql.append(" 'false' as isLiked, ");
         sql.append(" 'false' as canComment, ");
         sql.append(" '[]' as categories, ");
+        sql.append(" visit, ");
         sql.append(" created_at, ");
         sql.append(" updated_at, ");
         sql.append(" deleted_at ");
@@ -205,6 +207,7 @@ public class ProductRepoImpl implements ProductRepoCustom {
         sql.append(" 'false' as isLiked, ");
         sql.append(" 'false' as canComment, ");
         sql.append(" '[]' as categories, ");
+        sql.append(" visit, ");
         sql.append(" created_at, ");
         sql.append(" updated_at, ");
         sql.append(" deleted_at ");

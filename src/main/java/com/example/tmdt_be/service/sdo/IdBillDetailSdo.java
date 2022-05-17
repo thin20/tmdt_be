@@ -15,4 +15,5 @@ public class IdBillDetailSdo {
     private Long addressId;
     private Long productId;
     private Long purchaseType;
+    private Double price;
 }

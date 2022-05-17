@@ -24,4 +24,6 @@ public interface ProductService {
     Boolean removeImageProduct(String token, RemoveImageProductSdi sdi) throws JsonProcessingException;
 
     Boolean changeStatusSell(String token, ChangeStatusSellSdi sdi) throws JsonProcessingException;
+
+    Boolean addProductVisit(Long productId) throws JsonProcessingException;
 }

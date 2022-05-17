@@ -29,6 +29,7 @@ public class ProductSdo {
     private Boolean canComment;
     private List<Category> categories;
     private Boolean isLiked;
+    private Long visit;
     private String createdAt;
     private String updatedAt;
     private String deletedAt;
