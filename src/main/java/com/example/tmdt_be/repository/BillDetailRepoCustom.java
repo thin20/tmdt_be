@@ -31,4 +31,6 @@ public interface BillDetailRepoCustom {
     Boolean deleteProductInCart(Long billId);
 
     List<IdBillDetailSdo> getListIdBillDetailSellerByDate (Long sellerId, String dateTime);
+
+    List<IdBillDetailSdo> getListIdBillDetailSellerByMonthAndYear(Long sellerId, String monthTime, String yearTime);
 }

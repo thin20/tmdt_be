@@ -1,6 +1,7 @@
 package com.example.tmdt_be.controller;
 
 import com.example.tmdt_be.service.DashboardService;
+import com.example.tmdt_be.service.sdo.DataSalesDashboardSdo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,5 +19,11 @@ public class DashboardController {
     public ResponseEntity<Double> getRevenueSellerByDate(@RequestParam(value = "dateTime", required = false) String dateTime,
                                                          @RequestHeader("Authorization") String token) throws JsonProcessingException {
         return ResponseEntity.ok(dashboardService.getRevenueSellerByDate(token, dateTime));
+    }
+
+    @GetMapping(value = "getDataSalesDashboard")
+    public ResponseEntity<DataSalesDashboardSdo> getDataSalesDashboard(@RequestParam(value = "yearTime", required = false) String yearTime,
+                                                                       @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(dashboardService.getDataSalesDashboard(token, yearTime));
     }
 }
