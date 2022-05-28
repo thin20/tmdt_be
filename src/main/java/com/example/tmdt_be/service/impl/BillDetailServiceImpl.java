@@ -422,6 +422,7 @@ public class BillDetailServiceImpl implements BillDetailService {
 
             billDetail.setStatusId(Const.PURCHASE_TYPE.WAIT_CONFIRM);
             billDetail.setAddressId(finalAddressId);
+            billDetail.setUpdatedAt(new Date());
             billDetailRepo.save(billDetail);
 
         });

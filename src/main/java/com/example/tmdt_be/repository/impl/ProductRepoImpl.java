@@ -5,6 +5,7 @@ import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.repository.ProductRepoCustom;
 import com.example.tmdt_be.service.sdi.SearchProductBySellerSdi;
 import com.example.tmdt_be.service.sdi.SearchProductSdi;
+import com.example.tmdt_be.service.sdo.DataVisitProductsDashboardSdo;
 import com.example.tmdt_be.service.sdo.ProductSdo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -276,5 +277,36 @@ public class ProductRepoImpl implements ProductRepoCustom {
         Object queryResult = query.getSingleResult();
 
         return DataUtil.safeToLong(queryResult);
+    }
+
+    @Override
+    public List<DataVisitProductsDashboardSdo> listTopVisitProduct(Long sellerId) {
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT ");
+        sql.append(" 	NAME, ");
+        sql.append(" 	visit  ");
+        sql.append(" FROM ");
+        sql.append(" 	product  ");
+        sql.append(" WHERE 1 = 1 ");
+
+        if (!DataUtil.isNullOrZero(sellerId)) {
+            sql.append(" and id_user = :sellerId");
+            params.put("sellerId", sellerId);
+        }
+
+        sql.append(" ORDER BY ");
+        sql.append(" 	visit DESC  ");
+        sql.append(" 	LIMIT 7 ");
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+
+        List<Object[]> queryResult = query.getResultList();
+        List<DataVisitProductsDashboardSdo> result = DataUtil.getResultFromListObjects(queryResult, DataVisitProductsDashboardSdo.class.getCanonicalName());
+
+        return result;
     }
 }

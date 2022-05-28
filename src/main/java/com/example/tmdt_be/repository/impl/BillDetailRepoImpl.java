@@ -5,14 +5,14 @@ import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.domain.BillDetail;
 import com.example.tmdt_be.repository.BillDetailRepoCustom;
 import com.example.tmdt_be.service.sdo.IdBillDetailSdo;
+import com.example.tmdt_be.service.sdo.SalesRankingSdo;
+import com.example.tmdt_be.service.sdo.SellNumberRankingSdo;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.springframework.data.domain.Pageable;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +134,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         }
         sql.append(" and bd.id_user = :userId ");
         params.put("userId", userId);
-        sql.append(" order by DATE(bd.updated_at) DESC ");
+        sql.append(" order by bd.updated_at DESC ");
 
         Query query = em.createNativeQuery(sql.toString());
         query.setMaxResults(pageable.getPageSize());
@@ -157,7 +157,6 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
-        sql.append(" and bd.id_status = :purchaseType ");
         if (purchaseType != Const.PURCHASE_TYPE.ALL) {
             sql.append(" and bd.id_status = :purchaseType ");
             params.put("purchaseType", purchaseType);
@@ -205,7 +204,7 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         }
         sql.append(" and p.id_user = :sellerId ");
         params.put("sellerId", sellerId);
-        sql.append(" order by DATE(bd.updated_at) DESC ");
+        sql.append(" order by bd.updated_at DESC ");
 
         Query query = em.createNativeQuery(sql.toString());
         query.setMaxResults(pageable.getPageSize());
@@ -384,14 +383,12 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" bd.id_address as addressId, ");
         sql.append(" p.id as productId, ");
         sql.append(" bd.id_status as purchaseType, ");
-        sql.append(" p.price ");
+        sql.append(" p.price * (1 - p.discount / 100) as price ");
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
-        sql.append(" and bd.id_status <> :purchaseType1 ");
-        params.put("purchaseType1", Const.PURCHASE_TYPE.ORDER);
-        sql.append(" and bd.id_status <> :purchaseType2 ");
-        params.put("purchaseType2", Const.PURCHASE_TYPE.CANCELED);
+        sql.append(" and bd.id_status = :purchaseType1 ");
+        params.put("purchaseType1", Const.PURCHASE_TYPE.DELIVERED);
         sql.append(" and p.id_user = :sellerId ");
         params.put("sellerId", sellerId);
         sql.append(" and DATE_FORMAT(bd.updated_at, '%Y/%m/%d') = :dateTime ");
@@ -419,14 +416,12 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         sql.append(" bd.id_address as addressId, ");
         sql.append(" p.id as productId, ");
         sql.append(" bd.id_status as purchaseType, ");
-        sql.append(" p.price ");
+        sql.append(" p.price * (1 - p.discount / 100) as price ");
         sql.append(" from bill_detail bd ");
         sql.append(" join product p ");
         sql.append(" on bd.id_product = p.id ");
-        sql.append(" and bd.id_status <> :purchaseType1 ");
-        params.put("purchaseType1", Const.PURCHASE_TYPE.ORDER);
-        sql.append(" and bd.id_status <> :purchaseType2 ");
-        params.put("purchaseType2", Const.PURCHASE_TYPE.CANCELED);
+        sql.append(" and bd.id_status = :purchaseType1 ");
+        params.put("purchaseType1", Const.PURCHASE_TYPE.DELIVERED);
         sql.append(" and p.id_user = :sellerId ");
         params.put("sellerId", sellerId);
         sql.append(" and MONTH(bd.updated_at) = :monthTime ");
@@ -440,6 +435,115 @@ public class BillDetailRepoImpl implements BillDetailRepoCustom {
         List<Object[]> queryResult = query.getResultList();
 
         List<IdBillDetailSdo> result = DataUtil.getResultFromListObjects(queryResult, IdBillDetailSdo.class.getCanonicalName());
+
+        return result;
+    }
+
+    @Override
+    public List<SalesRankingSdo> getListSaleRanking(Long sellerId, String yearTime) {
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+        sql.append(" SELECT ");
+        sql.append(" 	p.NAME as `name`, ");
+        sql.append(" 	( ");
+        sql.append(" 		SELECT ");
+        sql.append(" 			SUM( bd2.quantity * p2.price * (1 - p2.discount / 100))  ");
+        sql.append(" 		FROM ");
+        sql.append(" 			bill_detail bd2 ");
+        sql.append(" 			JOIN product p2 ON bd2.id_product = p2.id  ");
+        sql.append(" 		WHERE ");
+        sql.append(" 			p2.id = p.id  ");
+        sql.append(" 			and bd2.id_status = :purchaseType ");
+        sql.append(" 			and YEAR(bd2.updated_at) = :yearTime ");
+        sql.append(" 	) as revenue ");
+        sql.append(" FROM ");
+        sql.append(" 	bill_detail bd ");
+        sql.append(" 	JOIN product p ON bd.id_product = p.id  ");
+        sql.append(" 	where p.id_user = :sellerId ");
+        params.put("sellerId", sellerId);
+        sql.append(" 	and bd.id_status = :purchaseType ");
+        sql.append(" 	and YEAR(bd.updated_at) = :yearTime ");
+        sql.append(" 	GROUP BY bd.id_product ");
+        sql.append(" ORDER BY ");
+        sql.append(" 	revenue DESC ");
+        params.put("yearTime", yearTime);
+        params.put("purchaseType", Const.PURCHASE_TYPE.DELIVERED);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+        List<Object[]> queryResult = query.getResultList();
+
+        List<SalesRankingSdo> result = DataUtil.getResultFromListObjects(queryResult, SalesRankingSdo.class.getCanonicalName());
+
+        return result;
+    }
+
+    @Override
+    public Long getSellNumberDashboardByMonthAndYear(Long sellerId, String monthTime, String yearTime) {
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        sql.append(" SELECT ");
+        sql.append(" SUM(bd.quantity) ");
+        sql.append(" FROM bill_detail bd ");
+        sql.append(" join product p ");
+        sql.append(" on bd.id_product = p.id ");
+        sql.append(" and p.id_user = :sellerId ");
+        params.put("sellerId", sellerId);
+        sql.append(" and MONTH(bd.updated_at) = :monthTime ");
+        params.put("monthTime", monthTime);
+        sql.append(" and YEAR(bd.updated_at) = :yearTime ");
+        params.put("yearTime", yearTime);
+        sql.append(" and bd.id_status = :purchaseType ");
+        params.put("purchaseType", Const.PURCHASE_TYPE.DELIVERED);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+        Object queryResult = query.getSingleResult();
+
+        return DataUtil.safeToLong(queryResult);
+    }
+
+    @Override
+    public List<SellNumberRankingSdo> getListSellNumberRanking(Long sellerId, String yearTime) {
+        StringBuilder sql = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+        sql.append(" SELECT ");
+        sql.append(" 	p.NAME as `name`, ");
+        sql.append(" 	( ");
+        sql.append(" 		SELECT ");
+        sql.append(" 			SUM(bd2.quantity) ");
+        sql.append(" 		FROM ");
+        sql.append(" 			bill_detail bd2 ");
+        sql.append(" 			JOIN product p2 ON bd2.id_product = p2.id  ");
+        sql.append(" 		WHERE ");
+        sql.append(" 			p2.id = p.id  ");
+        sql.append(" 			and bd2.id_status = :purchaseType ");
+        sql.append(" 			and YEAR(bd2.updated_at) = :yearTime ");
+        sql.append(" 	) as sold, ");
+        sql.append(" 	p.quantity as inventory ");
+        sql.append(" FROM ");
+        sql.append(" 	bill_detail bd ");
+        sql.append(" 	JOIN product p ON bd.id_product = p.id  ");
+        sql.append(" 	where p.id_user = :sellerId ");
+        sql.append(" 	and bd.id_status = :purchaseType ");
+        sql.append(" 	and YEAR(bd.updated_at) = :yearTime ");
+        sql.append(" 	GROUP BY bd.id_product ");
+        sql.append(" ORDER BY ");
+        sql.append(" 	sold DESC ");
+
+        params.put("sellerId", sellerId);
+        params.put("purchaseType", Const.PURCHASE_TYPE.DELIVERED);
+        params.put("yearTime", yearTime);
+
+        Query query = em.createNativeQuery(sql.toString());
+
+        params.forEach((key, value) -> query.setParameter(key, value));
+        List<Object[]> queryResult = query.getResultList();
+
+        List<SellNumberRankingSdo> result = DataUtil.getResultFromListObjects(queryResult, SellNumberRankingSdo.class.getCanonicalName());
 
         return result;
     }

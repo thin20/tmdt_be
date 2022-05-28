@@ -2,17 +2,16 @@ package com.example.tmdt_be.service.impl;
 
 import com.example.tmdt_be.common.DataUtil;
 import com.example.tmdt_be.repository.BillDetailRepo;
+import com.example.tmdt_be.repository.ProductRepo;
 import com.example.tmdt_be.service.DashboardService;
 import com.example.tmdt_be.service.UserService;
-import com.example.tmdt_be.service.sdo.DataSalesDashboardSdo;
-import com.example.tmdt_be.service.sdo.IdBillDetailSdo;
-import com.example.tmdt_be.service.sdo.SalesDashboardSdo;
-import com.example.tmdt_be.service.sdo.SalesRankingSdo;
+import com.example.tmdt_be.service.sdo.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,6 +21,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Autowired
     BillDetailRepo billDetailRepo;
+
+    @Autowired
+    ProductRepo productRepo;
 
     @Autowired
     DashboardServiceImpl(UserService userService) {
@@ -62,12 +64,55 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
         // Get sales ranking
-        List<SalesRankingSdo> listSalesRanking = new ArrayList<>();
+        List<SalesRankingSdo> listSalesRanking = billDetailRepo.getListSaleRanking(sellerId, yearTime);
+
+        List<SalesRankingSdo> listSalesRankingResult = new ArrayList<>();
+        int length = listSalesRanking.size() < 7 ? listSalesRanking.size() : 7;
+        for (int i = 0; i < length; i++) {
+            listSalesRankingResult.add(listSalesRanking.get(i));
+        }
 
         DataSalesDashboardSdo result = new DataSalesDashboardSdo();
         result.setSalesDashboard(listSalesDashboard);
         result.setSalesRanking(listSalesRanking);
 
         return result;
+    }
+
+    @Override
+    public DataSellNumbersDashboardSdo getDataSellNumbersDashboard(String token, String yearTime) throws JsonProcessingException {
+        Long sellerId = userService.getUserIdByBearerToken(token);
+
+        List<SellNumberDashboardSdo> sellNumbersDashboardSdo = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            SellNumberDashboardSdo sellNumberDashboard = new SellNumberDashboardSdo();
+            Long sold = billDetailRepo.getSellNumberDashboardByMonthAndYear(sellerId, DataUtil.safeToString(i), yearTime);
+
+            sellNumberDashboard.setName("Tháng " + i);
+            sellNumberDashboard.setSold(sold);
+
+            sellNumbersDashboardSdo.add(sellNumberDashboard);
+        }
+
+        List<SellNumberRankingSdo> sellNumberRankings = billDetailRepo.getListSellNumberRanking(sellerId, yearTime);
+
+        List<SellNumberRankingSdo> sellNumberRankingsResult = new ArrayList<>();
+        int length = sellNumberRankings.size() < 7 ? sellNumberRankings.size() : 7;
+        for (int i = 0; i < length; i++) {
+            sellNumberRankingsResult.add(sellNumberRankings.get(i));
+        }
+
+        DataSellNumbersDashboardSdo result = new DataSellNumbersDashboardSdo();
+        result.setSellNumberDashboard(sellNumbersDashboardSdo);
+        result.setSellNumberRanking(sellNumberRankingsResult);
+
+        return result;
+    }
+
+    @Override
+    public List<DataVisitProductsDashboardSdo> getListTopVisitProduct(String token) throws JsonProcessingException {
+        Long sellerId = userService.getUserIdByBearerToken(token);
+
+        return productRepo.listTopVisitProduct(sellerId);
     }
 }
