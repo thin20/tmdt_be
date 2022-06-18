@@ -309,6 +309,32 @@ public class BillDetailServiceImpl implements BillDetailService {
     }
 
     @Override
+    public Boolean productBuyBack(String token, Long billId) throws JsonProcessingException {
+        if (DataUtil.isNullOrZero(billId)) throw new AppException("API-BILL014", "Mua lại sản phẩm thất bại!");
+
+        Long userId = userService.getUserIdByBearerToken(token);
+
+        BillDetail billDetail = billDetailRepo.findById(billId).orElseGet(() -> {
+            throw new AppException("API-BILL002", "Đơn hàng không tồn tại!");
+        });
+
+        Long productId = billDetail.getProductId();
+        Long quantity = billDetail.getQuantity();
+        Long addressId = billDetail.getAddressId();
+
+        BillDetail newBillDetail = new BillDetail();
+        newBillDetail.setUserId(userId);
+        newBillDetail.setProductId(productId);
+        newBillDetail.setQuantity(quantity);
+        newBillDetail.setAddressId(addressId);
+        newBillDetail.setStatusId(Const.PURCHASE_TYPE.ORDER);
+        newBillDetail.setCreatedAt(new Date());
+        newBillDetail.setUpdatedAt(new Date());
+
+        return !DataUtil.isNullOrZero(billDetailRepo.save(newBillDetail).getId());
+    }
+
+    @Override
     public Boolean updateQuantityProductInCart(String token, Long billId, Long quantity) throws JsonProcessingException {
         if (DataUtil.isNullOrZero(billId) || quantity == null) {
             throw new AppException("API-BILL007", "Cập nhật số lượng sản phẩm trong giỏ hàng thất bại!");

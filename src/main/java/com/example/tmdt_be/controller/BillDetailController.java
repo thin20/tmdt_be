@@ -68,6 +68,12 @@ public class BillDetailController {
         return ResponseEntity.ok(billDetailService.updateBillStatus(token, sdi.getBillId(), sdi.getStatusId()));
     }
 
+    @PostMapping(value="productBuyBack")
+    ResponseEntity<Boolean> productBuyBack(@Valid @RequestBody UpdateBillStatusSdi sdi,
+                                             @RequestHeader("Authorization") String token) throws JsonProcessingException {
+        return ResponseEntity.ok(billDetailService.productBuyBack(token, sdi.getBillId()));
+    }
+
     @PutMapping(value="updateQuantityProductInCart")
     ResponseEntity<Boolean> updateQuantityProductInCart(@Valid @RequestBody UpdateQuantityProductInCartSdi sdi,
                                                         @RequestHeader("Authorization") String token) throws JsonProcessingException {
