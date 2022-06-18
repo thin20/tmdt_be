@@ -207,7 +207,7 @@ public class ProductServiceImpl implements ProductService {
         List<String> imagesPath = sdi.getImagesPath();
         String description = sdi.getDescription();
 
-        if (DataUtil.isNullOrZero(categoryId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(discount) | DataUtil.isNullOrEmpty(imagesPath)) {
+        if (DataUtil.isNullOrZero(categoryId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(quantity) | discount == null | DataUtil.isNullOrEmpty(imagesPath)) {
             throw new AppException("API-PRD005", "Thêm mới sản phẩm thất bại!");
         }
 
@@ -260,7 +260,7 @@ public class ProductServiceImpl implements ProductService {
         List<String> imagesPath = sdi.getImagesPath();
 
 
-        if (DataUtil.isNullOrZero(productId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(quantity) | DataUtil.isNullOrZero(discount) | DataUtil.isNullOrEmpty(imagePath)) {
+        if (DataUtil.isNullOrZero(productId) | DataUtil.isNullOrEmpty(productName) | DataUtil.isNullOrZero(price) | DataUtil.isNullOrZero(quantity) | discount == null | DataUtil.isNullOrEmpty(imagePath)) {
             throw new AppException("API-PRD008", "Cập nhật sản phẩm thất bại!");
         }
 
